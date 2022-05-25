@@ -22,7 +22,24 @@ function refreshSettingsList() {
         type: 'GET',
         contentType: 'application/json'
     })
-        .done(function (data) {
-            alert("Data Loaded: " + data);
+        .done(function (json) {
+            const settingsTable = $('.js-settings-table .js-table-body');
+            let content = '';
+            if (json === undefined || json.length === 0) {
+                content = '<tr><td colSpan="5"> No Settings provided yet</td></tr>';
+            } else {
+                for (let i = 0; i < json.length; i++) {
+                    content += '<tr>';
+                    content += '<td><span>' + json[i].group + '</span></td>';
+                    content += '<td><span>' + json[i].key + '</span></td>';
+                    content += '<td><span>' + json[i].type + '</span></td>';
+                    content += '<td><span>' + json[i].value + '</span></td>';
+                    content += '<td><button id="remove">X</button></td>';
+                    content += '</tr>';
+                }
+            }
+
+            settingsTable.html(content);
+            alert("Data Loaded successfully!");
         });
 }

@@ -10,7 +10,7 @@
   <title>Настройки</title>
 </head>
 <body>
-<table class="table">
+<table class="table js-settings-table">
   <thead class="thead-light">
   <tr>
     <th scope="col"> Group</th>
@@ -20,7 +20,7 @@
     <!--    <th></th>-->
   </tr>
   </thead>
-  <tbody>
+  <tbody class="js-table-body">
   <tr th:if="${settings.empty}">
     <td colspan="5"> No Settings provided yet</td>
   </tr>

@@ -1,7 +1,6 @@
 package com.osh4.accounting.service.impl;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +12,7 @@ import com.osh4.accounting.persistance.entity.Settings;
 import com.osh4.accounting.persistance.repository.SettingsRepository;
 import com.osh4.accounting.service.SettingsService;
 
+import static com.osh4.accounting.utils.Constants.SETTINGS_TYPES;
 import static java.util.Objects.nonNull;
 
 /**
@@ -20,6 +20,7 @@ import static java.util.Objects.nonNull;
  */
 @Service
 public class SettingsServiceImpl implements SettingsService {
+
     private final SettingsRepository settingsRepository;
     private final Converter<Settings, SettingsDto> settingsConverter;
     private final Converter<SettingsDto, Settings> settingsReverseConverter;
@@ -43,6 +44,7 @@ public class SettingsServiceImpl implements SettingsService {
     public void create(SettingsDto settingsDto) {
         Settings settings = settingsReverseConverter.convert(settingsDto);
         settingsRepository.save(settings);
+        settingsRepository.flush();
     }
 
     @Override
@@ -66,6 +68,6 @@ public class SettingsServiceImpl implements SettingsService {
 
     @Override
     public List<String> getAllTypes() {
-        return List.of(String.class.getName(), Long.class.getName(), Boolean.class.getName());
+        return SETTINGS_TYPES;
     }
 }
