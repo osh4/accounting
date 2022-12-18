@@ -35,6 +35,7 @@ CREATE TABLE accounts
     f_name         VARCHAR(100) NOT NULL,
     f_account_type BIGINT       NOT NULL REFERENCES account_types (pk),
     f_currency     BIGINT       NOT NULL REFERENCES currencies (pk),
+    f_user         BIGINT       NOT NULL REFERENCES users (pk),
     f_money_limit  DECIMAL(10, 2)
 );
 
@@ -80,7 +81,7 @@ CREATE TABLE financial_plans
     f_first_day   DATE           NOT NULL,
     f_money_limit DECIMAL(10, 2) NOT NULL,
     f_period      BIGINT         NOT NULL REFERENCES planning_periods (pk),
-    f_parent      BIGINT         NOT NULL REFERENCES financial_plans (pk)
+    f_parent      BIGINT REFERENCES financial_plans (pk)
 );
 
 CREATE TABLE fp_entries
@@ -111,8 +112,8 @@ CREATE TABLE users
         CONSTRAINT users_pk PRIMARY KEY,
     f_login     VARCHAR(100) NOT NULL,
     f_firstname VARCHAR(100),
-    f_lastname  VARCHAR(100)
-
+    f_lastname  VARCHAR(100),
+    f_password  VARCHAR(250) NOT NULL
 );
 
 CREATE TABLE user_roles

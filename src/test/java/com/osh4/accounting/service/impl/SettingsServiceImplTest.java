@@ -27,6 +27,9 @@ class SettingsServiceImplTest {
     private static final String OLD_VALUE = "oldValue";
     private static final String NEW_VALUE = "newValue";
 
+    private static final List<String> ALL_TYPES = List.of(String.class.getName(), Long.class.getName(), Boolean.class.getName());
+
+
     @Mock
     private Settings settings;
     @Mock
@@ -52,8 +55,8 @@ class SettingsServiceImplTest {
         Mockito.lenient().when(oldSettings.getValue()).thenReturn(OLD_VALUE);
         Mockito.lenient().when(settings.getValue()).thenReturn(NEW_VALUE);
         Mockito.lenient().when(settingsRepository.findAll()).thenReturn(Collections.singletonList(settings));
-        Mockito.lenient().when(settingsConverter.convertAll(any())).thenReturn(Collections.singletonList(settingsDto));
-        Mockito.lenient().when(settingsReverseConverter.convertAll(any()))
+        Mockito.lenient().when(settingsConverter.convertAll(any(List.class))).thenReturn(Collections.singletonList(settingsDto));
+        Mockito.lenient().when(settingsReverseConverter.convertAll(any(List.class)))
                 .thenReturn(Collections.singletonList(settings));
         Mockito.lenient().when(settingsReverseConverter.convert(any(SettingsDto.class))).thenReturn(settings);
         Mockito.lenient().when(settingsRepository.save(any(Settings.class))).thenReturn(settings);
@@ -71,7 +74,8 @@ class SettingsServiceImplTest {
     @Test
     public void shouldReturnEmptyListIfNoSettings() {
         Mockito.lenient().when(settingsRepository.findAll()).thenReturn(Collections.emptyList());
-        Mockito.lenient().when(settingsConverter.convertAll(Collections.emptyList())).thenReturn(Collections.emptyList());
+        Mockito.lenient().when(settingsConverter.convertAll(Collections.emptyList()))
+                .thenReturn(Collections.emptyList());
         List<SettingsDto> result = service.getAllSettings();
         assertTrue(CollectionUtils.isEmpty(result));
     }
@@ -108,5 +112,20 @@ class SettingsServiceImplTest {
 
         verify(settingsRepository, times(0)).delete(settings);
     }
+
+    @Test
+    public void shouldReturnAllSettingTypes() {
+        List<String> result = service.getAllTypes();
+        assertTrue(ALL_TYPES.containsAll(result));
+    }
+//
+//    @Test
+//    public void shouldCreateNewSettings() {
+//        Mockito.lenient().when(settingsRepository.findByGrpAndKey(GROUP, KEY)).thenReturn(settings);
+//
+//        service.create(settingsDto);
+//
+//        verify(settingsRepository, times(1)).save(settings);
+//    }
 
 }

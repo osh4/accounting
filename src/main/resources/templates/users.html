@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <title>User list</title>
+</head>
+<body>
+<table class="table js-users-table">
+    <thead class="thead-light">
+    <tr>
+        <th scope="col"> Login</th>
+        <th scope="col"> First name</th>
+        <th scope="col"> Last name</th>
+        <th scope="col" colspan="2"> Roles</th>
+        <!--    <th></th>-->
+    </tr>
+    </thead>
+    <tbody class="js-table-body">
+    <tr th:if="${users.empty}">
+        <td colspan="5"> No users exists</td>
+    </tr>
+    <tr th:each="user : ${users}">
+        <td><span th:text="${user.getLogin()}"> Login </span></td>
+        <td><span th:text="${user.getName()}"> First name </span></td>
+        <td><span th:text="${user.getSurname()}"> Last name </span></td>
+        <td><span th:text="${user.getRolesString()}"> Roles </span></td>
+        <!--        <td>-->
+        <!--            <button id="remove" onclick="delete">X</button>-->
+        <!--        </td>-->
+    </tr>
+    </tbody>
+</table>
+
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script type="text/javascript" th:src="@{/js/settings.js}"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"
+        integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q"
+        crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"
+        integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl"
+        crossorigin="anonymous"></script>
+</body>
+</html>
