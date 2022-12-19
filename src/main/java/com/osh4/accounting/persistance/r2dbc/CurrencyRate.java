@@ -20,7 +20,7 @@ import static java.util.Objects.nonNull;
 public class CurrencyRate implements Persistable<String> {
     @Id
     private String id;
-    private LocalDate date;
+    private LocalDate rateDate;
     private Double rate;
     private String sourceId;
     private String targetId;

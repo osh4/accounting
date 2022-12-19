@@ -18,10 +18,10 @@ import static java.util.Objects.nonNull;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)
-public class Transaction implements Persistable<Long> {
+public class Transaction implements Persistable<String> {
     @Id
-    private Long id;
-    private LocalDate date;
+    private String id;
+    private LocalDate transactionDate;
     private BigDecimal amount;
     private String description;
     private String transactionTypeId;
