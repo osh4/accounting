@@ -1,76 +1,52 @@
 package com.osh4.accounting.controller;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
-import com.osh4.accounting.dto.SettingsDto;
+import com.osh4.accounting.dto.SettingDto;
 import com.osh4.accounting.service.SettingsService;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-@Controller
-@RequestMapping("/settings")
+@RestController
+@RequestMapping("/setting")
+@Slf4j
+@AllArgsConstructor
 public class SettingsController {
-    private static final String SETTINGS_VIEW = "settings";
-    private static final String SUCCESS = "SUCCESS";
     private final SettingsService settingsService;
 
-    @Autowired
-    public SettingsController(final SettingsService settingsService) {
-        this.settingsService = settingsService;
-    }
-
     @GetMapping
-    public String getSettings(Model model) {
-        model.addAttribute("settings", settingsService.getAllSettings());
-        model.addAttribute("types", settingsService.getAllTypes());
-        return SETTINGS_VIEW;
+    public Flux<SettingDto> getSettings() {
+        return settingsService.getAllSettings();
     }
 
-    @ResponseBody
-    @GetMapping("/async")
-    public ResponseEntity<List<SettingsDto>> getSettingsAjax() {
-        return ResponseEntity.ok(settingsService.getAllSettings());
+    @GetMapping("/types")
+    public Flux<String> getSettingTypes() {
+        return settingsService.getAllTypes();
     }
 
-    @ResponseBody
-    @PostMapping(value = "/add")
-    public ResponseEntity<String> createSetting(@RequestBody SettingsDto settingsDto) {
-        try {
-            settingsService.create(settingsDto);
-            return ResponseEntity.ok(SUCCESS);
-        } catch (Exception ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
-        }
-    }
-
-    @ResponseBody
     @PostMapping
-    public ResponseEntity<?> updateSetting(@RequestBody SettingsDto settingsDto) {
-        try {
-            SettingsDto result = settingsService.update(settingsDto);
-            return ResponseEntity.ok(result);
-        } catch (Exception ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
-        }
+    public Mono<ResponseEntity<String>> createSetting(@RequestBody SettingDto settingDto) {
+        return settingsService.create(settingDto)
+                .flatMap(s -> Mono.just(ResponseEntity.accepted().contentType(MediaType.APPLICATION_JSON).body(s)))
+                .onErrorReturn(ResponseEntity.unprocessableEntity().body("Can't add the setting"));
+    }
+
+    @PutMapping
+    public Mono<ResponseEntity<String>> updateSetting(@RequestBody SettingDto settingDto) {
+        return settingsService.update(settingDto)
+                .flatMap(s -> Mono.just(ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(s)))
+                .onErrorReturn(ResponseEntity.unprocessableEntity().body("Can't update the setting"));
     }
 
     @ResponseBody
     @DeleteMapping
-    public ResponseEntity<String> deleteSetting(@RequestBody SettingsDto settingsDto) {
-        try {
-            settingsService.delete(settingsDto);
-            return ResponseEntity.ok(SUCCESS);
-        } catch (Exception ex) {
-            return ResponseEntity.badRequest().body(ex.getMessage());
-        }
+    public Mono<ResponseEntity<String>> deleteSetting(@RequestBody SettingDto settingDto) {
+        return settingsService.delete(settingDto)
+                .flatMap(s -> Mono.just(ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(s)))
+                .onErrorReturn(ResponseEntity.unprocessableEntity().body("Can't remove the setting"));
     }
 }

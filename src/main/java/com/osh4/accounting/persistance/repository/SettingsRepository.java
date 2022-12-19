@@ -1,14 +1,12 @@
 package com.osh4.accounting.persistance.repository;
 
-import com.osh4.accounting.persistance.entity.Settings;
-import org.springframework.data.jpa.repository.JpaRepository;
+import com.osh4.accounting.persistance.r2dbc.Setting;
+import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
+import reactor.core.publisher.Mono;
 
 @Repository
-public interface SettingsRepository extends JpaRepository<Settings, Long> {
-    List<Settings> findAllByGrp(String grp);
+public interface SettingsRepository extends ReactiveCrudRepository<Setting, Long> {
 
-    Settings findByGrpAndKey(String grp, String key);
+    Mono<Setting> findByKey(String key);
 }

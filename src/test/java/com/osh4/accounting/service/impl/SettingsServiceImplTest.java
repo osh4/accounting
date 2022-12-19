@@ -1,8 +1,8 @@
 package com.osh4.accounting.service.impl;
 
 import com.osh4.accounting.converters.Converter;
-import com.osh4.accounting.dto.SettingsDto;
-import com.osh4.accounting.persistance.entity.Settings;
+import com.osh4.accounting.dto.SettingDto;
+import com.osh4.accounting.persistance.r2dbc.Setting;
 import com.osh4.accounting.persistance.repository.SettingsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -11,76 +11,79 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.util.CollectionUtils;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.Collections;
-import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 class SettingsServiceImplTest {
-    private static final String GROUP = "group";
     private static final String KEY = "key";
     private static final String OLD_VALUE = "oldValue";
     private static final String NEW_VALUE = "newValue";
 
     @Mock
-    private Settings settings;
+    private Setting settings;
     @Mock
-    private Settings oldSettings;
+    private Setting oldSettings;
     @Mock
-    private SettingsDto settingsDto;
+    private SettingDto settingDto;
 
     @Mock
     private SettingsRepository settingsRepository;
     @Mock
-    private Converter<Settings, SettingsDto> settingsConverter;
+    private Converter<Setting, SettingDto> settingsConverter;
     @Mock
-    private Converter<SettingsDto, Settings> settingsReverseConverter;
+    private Converter<SettingDto, Setting> settingsReverseConverter;
     @InjectMocks
     private SettingsServiceImpl service;
 
 
     @BeforeEach
     public void setUp() {
-        Mockito.lenient().when(settingsDto.getGroup()).thenReturn(GROUP);
-        Mockito.lenient().when(settingsDto.getKey()).thenReturn(KEY);
-        Mockito.lenient().when(settingsDto.getValue()).thenReturn(NEW_VALUE);
+        Mockito.lenient().when(settingDto.getKey()).thenReturn(KEY);
+        Mockito.lenient().when(settingDto.getValue()).thenReturn(NEW_VALUE);
         Mockito.lenient().when(oldSettings.getValue()).thenReturn(OLD_VALUE);
         Mockito.lenient().when(settings.getValue()).thenReturn(NEW_VALUE);
-        Mockito.lenient().when(settingsRepository.findAll()).thenReturn(Collections.singletonList(settings));
-        Mockito.lenient().when(settingsConverter.convertAll(any())).thenReturn(Collections.singletonList(settingsDto));
+        Mockito.lenient().when(settingsRepository.findAll()).thenReturn(Flux.just(settings));
+        Mockito.lenient().when(settingsConverter.convertAll(any())).thenReturn(Collections.singletonList(settingDto));
         Mockito.lenient().when(settingsReverseConverter.convertAll(any()))
                 .thenReturn(Collections.singletonList(settings));
-        Mockito.lenient().when(settingsReverseConverter.convert(any(SettingsDto.class))).thenReturn(settings);
-        Mockito.lenient().when(settingsRepository.save(any(Settings.class))).thenReturn(settings);
-        Mockito.lenient().when(settingsRepository.findByGrpAndKey(GROUP, KEY)).thenReturn(settings);
+        Mockito.lenient().when(settingsReverseConverter.convert(any(SettingDto.class))).thenReturn(settings);
+        Mockito.lenient().when(settingsRepository.save(any(Setting.class))).thenReturn(Mono.just(settings));
+        Mockito.lenient().when(settingsRepository.findByKey(KEY)).thenReturn(Mono.just(settings));
 
     }
 
     @Test
     public void shouldGetAndConvertAllSettings() {
-        List<SettingsDto> result = service.getAllSettings();
+        Flux<SettingDto> result = service.getAllSettings();
         assertNotNull(result);
-        assertEquals(1, result.size());
+        assertTrue(false);
+        //assertEquals(1, result.size());
     }
 
     @Test
     public void shouldReturnEmptyListIfNoSettings() {
-        Mockito.lenient().when(settingsRepository.findAll()).thenReturn(Collections.emptyList());
+        Mockito.lenient().when(settingsRepository.findAll()).thenReturn(Flux.empty());
         Mockito.lenient().when(settingsConverter.convertAll(Collections.emptyList())).thenReturn(Collections.emptyList());
-        List<SettingsDto> result = service.getAllSettings();
-        assertTrue(CollectionUtils.isEmpty(result));
+        Flux<SettingDto> result = service.getAllSettings();
+        //result.hasElements().flatMap(Assertions::assertFalse).subscribe();
+        //assertTrue(CollectionUtils.isEmpty(result));
+        assertTrue(false);
     }
 
     @Test
     public void shouldUpdateSettings() {
-        Mockito.lenient().when(settingsRepository.findByGrpAndKey(GROUP, KEY)).thenReturn(oldSettings);
+        Mockito.lenient().when(settingsRepository.findByKey(KEY)).thenReturn(Mono.just(oldSettings));
 
-        service.update(settingsDto);
+        service.update(settingDto);
 
         verify(oldSettings).setValue(NEW_VALUE);
     }
@@ -88,23 +91,23 @@ class SettingsServiceImplTest {
     @Test
     public void shouldNotUpdateSettingsIfEqualValues() {
 
-        service.update(settingsDto);
+        service.update(settingDto);
         verify(settings, times(0)).setValue(NEW_VALUE);
     }
 
     @Test
     public void shouldDeleteSettings() {
 
-        service.delete(settingsDto);
+        service.delete(settingDto);
 
         verify(settingsRepository, times(1)).delete(settings);
     }
 
     @Test
     public void shouldDoNothingIfSettingNotExists() {
-        Mockito.lenient().when(settingsRepository.findByGrpAndKey(GROUP, KEY)).thenReturn(null);
+        Mockito.lenient().when(settingsRepository.findByKey(KEY)).thenReturn(null);
 
-        service.delete(settingsDto);
+        service.delete(settingDto);
 
         verify(settingsRepository, times(0)).delete(settings);
     }

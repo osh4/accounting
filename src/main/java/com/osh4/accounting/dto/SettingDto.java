@@ -1,18 +1,16 @@
 package com.osh4.accounting.dto;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * @author osh4 <kosntantin@osh4.com>
  */
-@Getter
-@Setter
 @NoArgsConstructor
-public class SettingsDto
+@AllArgsConstructor
+@Data
+@Builder(toBuilder = true)
+public class SettingDto
 {
-	private String group;
 	private String key;
 	private String type;
 	private String value;
