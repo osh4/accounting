@@ -7,33 +7,33 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import reactor.core.publisher.Mono;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class SettingsReverseConverterTest {
+class SettingConverterTest {
+
     private static final String GROUP = "group";
     private static final String KEY = "key";
     private static final String TYPE = "type";
     private static final String VALUE = "value";
 
     @Mock
-    private SettingDto settingDto;
+    private Setting settings;
 
     @InjectMocks
-    private SettingsReverseConverter converter;
+    private SettingConverter settingConverter;
 
     @Test
     public void shouldPopulateFields() {
-        when(settingDto.getGroup()).thenReturn(GROUP);
-        when(settingDto.getKey()).thenReturn(KEY);
-        when(settingDto.getType()).thenReturn(TYPE);
-        when(settingDto.getValue()).thenReturn(VALUE);
+        when(settings.getKey()).thenReturn(KEY);
+        when(settings.getType()).thenReturn(TYPE);
+        when(settings.getValue()).thenReturn(VALUE);
 
-        Mono<Setting> result = converter.convert(settingDto);
-//        assertEquals(KEY, result.block().getKey());
-//        assertEquals(TYPE, result.getType());
-//        assertEquals(VALUE, result.getValue());
+        SettingDto result = settingConverter.convert(settings);
+        assertEquals(KEY, result.getKey());
+        assertEquals(TYPE, result.getType());
+        assertEquals(VALUE, result.getValue());
     }
 }

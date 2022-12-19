@@ -7,7 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.osh4.accounting.dto.SettingDto;
-import com.osh4.accounting.service.SettingsService;
+import com.osh4.accounting.service.SettingService;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -15,29 +15,29 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/setting")
 @Slf4j
 @AllArgsConstructor
-public class SettingsController {
-    private final SettingsService settingsService;
+public class SettingController {
+    private final SettingService settingService;
 
     @GetMapping
     public Flux<SettingDto> getSettings() {
-        return settingsService.getAllSettings();
+        return settingService.getAllSettings();
     }
 
     @GetMapping("/types")
     public Flux<String> getSettingTypes() {
-        return settingsService.getAllTypes();
+        return settingService.getAllTypes();
     }
 
     @PostMapping
     public Mono<ResponseEntity<String>> createSetting(@RequestBody SettingDto settingDto) {
-        return settingsService.create(settingDto)
+        return settingService.create(settingDto)
                 .flatMap(s -> Mono.just(ResponseEntity.accepted().contentType(MediaType.APPLICATION_JSON).body(s)))
                 .onErrorReturn(ResponseEntity.unprocessableEntity().body("Can't add the setting"));
     }
 
     @PutMapping
     public Mono<ResponseEntity<String>> updateSetting(@RequestBody SettingDto settingDto) {
-        return settingsService.update(settingDto)
+        return settingService.update(settingDto)
                 .flatMap(s -> Mono.just(ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(s)))
                 .onErrorReturn(ResponseEntity.unprocessableEntity().body("Can't update the setting"));
     }
@@ -45,7 +45,7 @@ public class SettingsController {
     @ResponseBody
     @DeleteMapping
     public Mono<ResponseEntity<String>> deleteSetting(@RequestBody SettingDto settingDto) {
-        return settingsService.delete(settingDto)
+        return settingService.delete(settingDto)
                 .flatMap(s -> Mono.just(ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(s)))
                 .onErrorReturn(ResponseEntity.unprocessableEntity().body("Can't remove the setting"));
     }

@@ -7,7 +7,7 @@ import reactor.core.publisher.Mono;
 /**
  * @author osh4 <kosntantin@osh4.com>
  */
-public interface SettingsService {
+public interface SettingService {
     Flux<SettingDto> getAllSettings();
 
     Mono<String> create(SettingDto settingDto);

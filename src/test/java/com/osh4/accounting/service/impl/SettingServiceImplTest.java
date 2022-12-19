@@ -3,7 +3,7 @@ package com.osh4.accounting.service.impl;
 import com.osh4.accounting.converters.Converter;
 import com.osh4.accounting.dto.SettingDto;
 import com.osh4.accounting.persistance.r2dbc.Setting;
-import com.osh4.accounting.persistance.repository.SettingsRepository;
+import com.osh4.accounting.persistance.repository.SettingRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
-class SettingsServiceImplTest {
+class SettingServiceImplTest {
     private static final String KEY = "key";
     private static final String OLD_VALUE = "oldValue";
     private static final String NEW_VALUE = "newValue";
@@ -36,13 +36,13 @@ class SettingsServiceImplTest {
     private SettingDto settingDto;
 
     @Mock
-    private SettingsRepository settingsRepository;
+    private SettingRepository settingRepository;
     @Mock
     private Converter<Setting, SettingDto> settingsConverter;
     @Mock
     private Converter<SettingDto, Setting> settingsReverseConverter;
     @InjectMocks
-    private SettingsServiceImpl service;
+    private SettingServiceImpl service;
 
 
     @BeforeEach
@@ -51,13 +51,13 @@ class SettingsServiceImplTest {
         Mockito.lenient().when(settingDto.getValue()).thenReturn(NEW_VALUE);
         Mockito.lenient().when(oldSettings.getValue()).thenReturn(OLD_VALUE);
         Mockito.lenient().when(settings.getValue()).thenReturn(NEW_VALUE);
-        Mockito.lenient().when(settingsRepository.findAll()).thenReturn(Flux.just(settings));
+        Mockito.lenient().when(settingRepository.findAll()).thenReturn(Flux.just(settings));
         Mockito.lenient().when(settingsConverter.convertAll(any())).thenReturn(Collections.singletonList(settingDto));
         Mockito.lenient().when(settingsReverseConverter.convertAll(any()))
                 .thenReturn(Collections.singletonList(settings));
         Mockito.lenient().when(settingsReverseConverter.convert(any(SettingDto.class))).thenReturn(settings);
-        Mockito.lenient().when(settingsRepository.save(any(Setting.class))).thenReturn(Mono.just(settings));
-        Mockito.lenient().when(settingsRepository.findByKey(KEY)).thenReturn(Mono.just(settings));
+        Mockito.lenient().when(settingRepository.save(any(Setting.class))).thenReturn(Mono.just(settings));
+        Mockito.lenient().when(settingRepository.findByKey(KEY)).thenReturn(Mono.just(settings));
 
     }
 
@@ -71,7 +71,7 @@ class SettingsServiceImplTest {
 
     @Test
     public void shouldReturnEmptyListIfNoSettings() {
-        Mockito.lenient().when(settingsRepository.findAll()).thenReturn(Flux.empty());
+        Mockito.lenient().when(settingRepository.findAll()).thenReturn(Flux.empty());
         Mockito.lenient().when(settingsConverter.convertAll(Collections.emptyList())).thenReturn(Collections.emptyList());
         Flux<SettingDto> result = service.getAllSettings();
         //result.hasElements().flatMap(Assertions::assertFalse).subscribe();
@@ -81,7 +81,7 @@ class SettingsServiceImplTest {
 
     @Test
     public void shouldUpdateSettings() {
-        Mockito.lenient().when(settingsRepository.findByKey(KEY)).thenReturn(Mono.just(oldSettings));
+        Mockito.lenient().when(settingRepository.findByKey(KEY)).thenReturn(Mono.just(oldSettings));
 
         service.update(settingDto);
 
@@ -100,16 +100,16 @@ class SettingsServiceImplTest {
 
         service.delete(settingDto);
 
-        verify(settingsRepository, times(1)).delete(settings);
+        verify(settingRepository, times(1)).delete(settings);
     }
 
     @Test
     public void shouldDoNothingIfSettingNotExists() {
-        Mockito.lenient().when(settingsRepository.findByKey(KEY)).thenReturn(null);
+        Mockito.lenient().when(settingRepository.findByKey(KEY)).thenReturn(null);
 
         service.delete(settingDto);
 
-        verify(settingsRepository, times(0)).delete(settings);
+        verify(settingRepository, times(0)).delete(settings);
     }
 
 }

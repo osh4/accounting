@@ -5,9 +5,9 @@ import lombok.*;
 /**
  * @author osh4 <kosntantin@osh4.com>
  */
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Data
 @Builder(toBuilder = true)
 public class SettingDto
 {

@@ -6,7 +6,7 @@ import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Mono;
 
 @Repository
-public interface SettingsRepository extends ReactiveCrudRepository<Setting, Long> {
+public interface SettingRepository extends ReactiveCrudRepository<Setting, String> {
 
     Mono<Setting> findByKey(String key);
 }
