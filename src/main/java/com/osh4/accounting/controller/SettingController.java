@@ -19,24 +19,28 @@ public class SettingController {
     private final SettingService settingService;
 
     @GetMapping
-    public Flux<SettingDto> getSettings() {
+    public Flux<SettingDto> getAll() {
         return settingService.getAll();
+    }
+    @GetMapping("/{id}")
+    public Mono<SettingDto> get(@PathVariable String key) {
+        return settingService.getByKey(key);
     }
 
     @GetMapping("/types")
-    public Flux<String> getSettingTypes() {
+    public Flux<String> getAllTypes() {
         return settingService.getAllTypes();
     }
 
     @PostMapping
-    public Mono<ResponseEntity<String>> createSetting(@RequestBody SettingDto settingDto) {
+    public Mono<ResponseEntity<String>> create(@RequestBody SettingDto settingDto) {
         return settingService.create(settingDto)
                 .flatMap(s -> Mono.just(ResponseEntity.accepted().contentType(MediaType.APPLICATION_JSON).body(s)))
                 .onErrorReturn(ResponseEntity.unprocessableEntity().body("Can't add the setting"));
     }
 
     @PutMapping
-    public Mono<ResponseEntity<String>> updateSetting(@RequestBody SettingDto settingDto) {
+    public Mono<ResponseEntity<String>> update(@RequestBody SettingDto settingDto) {
         return settingService.update(settingDto)
                 .flatMap(s -> Mono.just(ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(s)))
                 .onErrorReturn(ResponseEntity.unprocessableEntity().body("Can't update the setting"));
@@ -44,7 +48,7 @@ public class SettingController {
 
     @ResponseBody
     @DeleteMapping
-    public Mono<ResponseEntity<String>> deleteSetting(@RequestBody SettingDto settingDto) {
+    public Mono<ResponseEntity<String>> delete(@RequestBody SettingDto settingDto) {
         return settingService.delete(settingDto)
                 .flatMap(s -> Mono.just(ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(s)))
                 .onErrorReturn(ResponseEntity.unprocessableEntity().body("Can't remove the setting"));
