@@ -7,7 +7,9 @@ import reactor.core.publisher.Mono;
 public interface CurrencyService {
 
     Flux<CurrencyDto> getAll();
+
     Mono<CurrencyDto> get(String id);
+
     Mono<String> create(CurrencyDto dto);
 
     Mono<String> update(CurrencyDto dto);

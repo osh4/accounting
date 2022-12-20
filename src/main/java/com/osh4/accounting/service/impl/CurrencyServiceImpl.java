@@ -1,5 +1,6 @@
 package com.osh4.accounting.service.impl;
 
+import com.osh4.accounting.converters.Converter;
 import com.osh4.accounting.dto.CurrencyDto;
 import com.osh4.accounting.persistance.r2dbc.Currency;
 import com.osh4.accounting.persistance.repository.CurrencyRepository;
@@ -17,17 +18,19 @@ import static java.util.Objects.nonNull;
 @AllArgsConstructor
 public class CurrencyServiceImpl implements CurrencyService {
     private CurrencyRepository currencyRepository;
+    private Converter<Currency, CurrencyDto> currencyConverter;
+    private Converter<CurrencyDto, Mono<Currency>> currencyReverseConverter;
 
     @Override
     public Flux<CurrencyDto> getAll() {
         return currencyRepository.findAll()
-                .map(this::toDto);
+                .map(currencyConverter::convert);
     }
 
     @Override
     public Mono<CurrencyDto> get(String id) {
         return currencyRepository.findById(id)
-                .map(this::toDto);
+                .map(currencyConverter::convert);
     }
 
 
@@ -35,7 +38,7 @@ public class CurrencyServiceImpl implements CurrencyService {
     public Mono<String> create(CurrencyDto dto) {
         return currencyRepository.findById(dto.getId())
                 .flatMap(x -> Mono.error(new DuplicateKeyException("AlreadyExist")))
-                .switchIfEmpty(toModel(dto).flatMap(currencyRepository::save))
+                .switchIfEmpty(currencyReverseConverter.convert(dto).flatMap(currencyRepository::save))
                 .flatMap(x -> Mono.just("Add Success"));
     }
 
@@ -53,21 +56,6 @@ public class CurrencyServiceImpl implements CurrencyService {
                 .map(currencyRepository::delete)
                 .flatMap(x -> Mono.just("Successful remove!"))
                 .switchIfEmpty(Mono.error(new Exception("Problems with removal")));
-    }
-
-    private CurrencyDto toDto(Currency currency) {
-        return CurrencyDto.builder()
-                .id(currency.getId())
-                .isoCode(currency.getIsoCode())
-                .name(currency.getName())
-                .build();
-    }
-
-    private Mono<Currency> toModel(CurrencyDto dto) {
-        return Mono.just(Currency.builder().id(dto.getId())
-                .name(dto.getName())
-                .isoCode(dto.getIsoCode())
-                .build());
     }
 
     private Currency setValues(Currency currency, CurrencyDto dto) {

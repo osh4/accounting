@@ -14,7 +14,7 @@ import reactor.core.publisher.Mono;
 import static com.osh4.accounting.utils.Constants.SETTINGS_TYPES;
 
 /**
- * @author osh4 <kosntantin@osh4.com>
+ * @author osh4 <konstantin@osh4.com>
  */
 @Service
 public class SettingServiceImpl implements SettingService {

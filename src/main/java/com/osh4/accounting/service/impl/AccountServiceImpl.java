@@ -1,14 +1,12 @@
 package com.osh4.accounting.service.impl;
 
+import com.osh4.accounting.converters.Converter;
 import com.osh4.accounting.dto.AccountDto;
-import com.osh4.accounting.dto.CurrencyDto;
 import com.osh4.accounting.persistance.r2dbc.Account;
 import com.osh4.accounting.persistance.repository.AccountRepository;
 import com.osh4.accounting.service.AccountService;
-import com.osh4.accounting.service.CurrencyService;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -20,25 +18,26 @@ import static java.util.Objects.nonNull;
 @AllArgsConstructor
 public class AccountServiceImpl implements AccountService {
     private AccountRepository accountRepository;
-    private CurrencyService currencyService;
+    private Converter<Account, AccountDto> accountConverter;
+    private Converter<AccountDto, Mono<Account>> accountReverseConverter;
 
     @Override
     public Flux<AccountDto> getAll() {
         return accountRepository.findAll()
-                .map(this::toDto);
+                .map(accountConverter::convert);
     }
 
     @Override
     public Mono<AccountDto> get(String id) {
         return accountRepository.findById(id)
-                .map(this::toDto);
+                .map(accountConverter::convert);
     }
 
     @Override
     public Mono<String> create(AccountDto dto) {
         return accountRepository.findById(dto.getId())
                 .flatMap(x -> Mono.error(new DuplicateKeyException("AlreadyExist")))
-                .switchIfEmpty(toModel(dto).flatMap(accountRepository::save))
+                .switchIfEmpty(accountReverseConverter.convert(dto).flatMap(accountRepository::save))
                 .flatMap(x -> Mono.just("Add Success"));
     }
 
@@ -71,31 +70,5 @@ public class AccountServiceImpl implements AccountService {
             acc.setCurrencyId(dto.getCurrency().getId());
         }
         return acc;
-    }
-
-    private Mono<Account> toModel(AccountDto dto) {
-        return Mono.just(Account.builder()
-                .id(dto.getId())
-                .name(dto.getName())
-                .description(dto.getDescription())
-                .currencyId(dto.getCurrency().getId())
-                .userId(dto.getUserId())
-                .build());
-    }
-
-    private AccountDto toDto(Account acc) {
-        return AccountDto.builder()
-                .id(acc.getId())
-                .name(acc.getName())
-                .description(acc.getDescription())
-                .currency(getCurrency(acc.getCurrencyId()))
-                .build();
-    }
-
-    private CurrencyDto getCurrency(String currencyId) {
-        if (StringUtils.isBlank(currencyId)) {
-            return null;
-        }
-        return currencyService.get(currencyId).block();
     }
 }

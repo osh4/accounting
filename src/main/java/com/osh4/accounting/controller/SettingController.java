@@ -22,7 +22,7 @@ public class SettingController {
     public Flux<SettingDto> getAll() {
         return settingService.getAll();
     }
-    @GetMapping("/{id}")
+    @GetMapping("/{key}")
     public Mono<SettingDto> get(@PathVariable String key) {
         return settingService.getByKey(key);
     }
