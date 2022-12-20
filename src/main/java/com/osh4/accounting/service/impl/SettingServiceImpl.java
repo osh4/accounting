@@ -33,8 +33,14 @@ public class SettingServiceImpl implements SettingService {
     }
 
     @Override
-    public Flux<SettingDto> getAllSettings() {
+    public Flux<SettingDto> getAll() {
         return settingRepository.findAll().map(settingConverter::convert);
+    }
+
+    @Override
+    public Mono<SettingDto> getByKey(String key) {
+        return settingRepository.findByKey(key)
+                .map(settingConverter::convert);
     }
 
     @Override

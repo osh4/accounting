@@ -20,7 +20,7 @@ public class SettingController {
 
     @GetMapping
     public Flux<SettingDto> getSettings() {
-        return settingService.getAllSettings();
+        return settingService.getAll();
     }
 
     @GetMapping("/types")
