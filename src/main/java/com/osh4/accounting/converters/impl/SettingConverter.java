@@ -6,7 +6,7 @@ import com.osh4.accounting.persistance.r2dbc.Setting;
 import org.springframework.stereotype.Service;
 
 /**
- * @author osh4 <kosntantin@osh4.com>
+ * @author osh4 <konstantin@osh4.com>
  */
 @Service
 public class SettingConverter implements Converter<Setting, SettingDto> {

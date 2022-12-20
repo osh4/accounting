@@ -3,7 +3,7 @@ package com.osh4.accounting.dto;
 import lombok.*;
 
 /**
- * @author osh4 <kosntantin@osh4.com>
+ * @author osh4 <konstantin@osh4.com>
  */
 @Data
 @NoArgsConstructor

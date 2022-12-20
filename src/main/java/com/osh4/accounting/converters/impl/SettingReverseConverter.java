@@ -8,7 +8,7 @@ import com.osh4.accounting.dto.SettingDto;
 import reactor.core.publisher.Mono;
 
 /**
- * @author osh4 <kosntantin@osh4.com>
+ * @author osh4 <konstantin@osh4.com>
  */
 @Service
 public class SettingReverseConverter implements Converter<SettingDto, Mono<Setting>> {

@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @author osh4 <kosntantin@osh4.com>
+ * @author osh4 <konstantin@osh4.com>
  */
 public interface Converter<SOURCE, TARGET>
 {
