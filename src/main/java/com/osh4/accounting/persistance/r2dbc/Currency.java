@@ -5,10 +5,11 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Table;
 
-import static java.util.Objects.nonNull;
+import static java.util.Objects.isNull;
 
 @Data
 @Table("currencies")
@@ -20,9 +21,16 @@ public class Currency implements Persistable<String> {
     private String id;
     private String isoCode;
     private String name;
+    @Transient
+    private boolean isNewEntity;
 
     @Override
     public boolean isNew() {
-        return nonNull(id);
+        return isNull(getId()) || this.isNewEntity;
+    }
+
+    public Currency setAsNew() {
+        this.isNewEntity = true;
+        return this;
     }
 }

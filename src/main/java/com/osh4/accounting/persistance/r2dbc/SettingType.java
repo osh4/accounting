@@ -12,30 +12,28 @@ import org.springframework.data.relational.core.mapping.Table;
 import static java.util.Objects.isNull;
 
 @Data
-@Table("settings")
+@Table("setting_types")
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder(toBuilder = true)
-public class Setting implements Persistable<String> {
+public class SettingType implements Persistable<String> {
     @Id
-    private String key;
-    private String type;
-    private String typeJavaClass;
-    private String value;
+    private String name;
+    private String className;
     @Transient
     private boolean isNewEntity;
 
     @Override
     public String getId() {
-        return getKey();
+        return getName();
     }
 
     @Override
     public boolean isNew() {
-        return isNull(getKey()) || this.isNewEntity;
+        return isNull(getId()) || this.isNewEntity;
     }
 
-    public Setting setAsNew() {
+    public SettingType setAsNew() {
         this.isNewEntity = true;
         return this;
     }

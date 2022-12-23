@@ -5,13 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.domain.Persistable;
 import org.springframework.data.relational.core.mapping.Table;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import static java.util.Objects.nonNull;
+import static java.util.Objects.isNull;
 
 @Data
 @Table("transactions")
@@ -27,9 +28,16 @@ public class Transaction implements Persistable<String> {
     private String transactionTypeId;
     private String sourceAccountId;
     private String targetAccountId;
+    @Transient
+    private boolean isNewEntity;
 
     @Override
     public boolean isNew() {
-        return nonNull(id);
+        return isNull(getId()) || this.isNewEntity;
+    }
+
+    public Transaction setAsNew() {
+        this.isNewEntity = true;
+        return this;
     }
 }
