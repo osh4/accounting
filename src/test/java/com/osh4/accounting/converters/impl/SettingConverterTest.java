@@ -14,7 +14,6 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class SettingConverterTest {
 
-    private static final String GROUP = "group";
     private static final String KEY = "key";
     private static final String TYPE = "type";
     private static final String VALUE = "value";

@@ -57,13 +57,13 @@ class SettingServiceImplTest {
                 .thenReturn(Collections.singletonList(settings));
         Mockito.lenient().when(settingsReverseConverter.convert(any(SettingDto.class))).thenReturn(settings);
         Mockito.lenient().when(settingRepository.save(any(Setting.class))).thenReturn(Mono.just(settings));
-        Mockito.lenient().when(settingRepository.findByKey(KEY)).thenReturn(Mono.just(settings));
+        Mockito.lenient().when(settingRepository.findById(KEY)).thenReturn(Mono.just(settings));
 
     }
 
     @Test
     public void shouldGetAndConvertAllSettings() {
-        Flux<SettingDto> result = service.getAllSettings();
+        Flux<SettingDto> result = service.getAll();
         assertNotNull(result);
         assertTrue(false);
         //assertEquals(1, result.size());
@@ -73,7 +73,7 @@ class SettingServiceImplTest {
     public void shouldReturnEmptyListIfNoSettings() {
         Mockito.lenient().when(settingRepository.findAll()).thenReturn(Flux.empty());
         Mockito.lenient().when(settingsConverter.convertAll(Collections.emptyList())).thenReturn(Collections.emptyList());
-        Flux<SettingDto> result = service.getAllSettings();
+        Flux<SettingDto> result = service.getAll();
         //result.hasElements().flatMap(Assertions::assertFalse).subscribe();
         //assertTrue(CollectionUtils.isEmpty(result));
         assertTrue(false);
@@ -81,7 +81,7 @@ class SettingServiceImplTest {
 
     @Test
     public void shouldUpdateSettings() {
-        Mockito.lenient().when(settingRepository.findByKey(KEY)).thenReturn(Mono.just(oldSettings));
+        Mockito.lenient().when(settingRepository.findById(KEY)).thenReturn(Mono.just(oldSettings));
 
         service.update(settingDto);
 
@@ -105,7 +105,7 @@ class SettingServiceImplTest {
 
     @Test
     public void shouldDoNothingIfSettingNotExists() {
-        Mockito.lenient().when(settingRepository.findByKey(KEY)).thenReturn(null);
+        Mockito.lenient().when(settingRepository.findById(KEY)).thenReturn(null);
 
         service.delete(settingDto);
 
