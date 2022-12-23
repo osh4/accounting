@@ -5,6 +5,8 @@ import com.osh4.accounting.dto.AccountDto;
 import com.osh4.accounting.persistance.r2dbc.Account;
 import org.springframework.stereotype.Component;
 
+import static java.util.Objects.isNull;
+
 /**
  * @author osh4 <konstantin@osh4.com>
  */
@@ -13,7 +15,7 @@ public class AccountReverseConverter implements Converter<AccountDto, Account> {
 
     @Override
     public Account convert(AccountDto dto) {
-        return Account.builder()
+        return isNull(dto) ? null : Account.builder()
                 .id(dto.getId())
                 .name(dto.getName())
                 .description(dto.getDescription())
