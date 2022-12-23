@@ -34,10 +34,18 @@ DROP TABLE IF EXISTS settings;
 
 CREATE TABLE settings
 (
-    key           varchar(200) PRIMARY KEY,
-    type          varchar(200),
-    typeJavaClass varchar(200),
-    value         varchar(200)
+    key             varchar(200) PRIMARY KEY,
+    type            varchar(200),
+    type_java_class varchar(200),
+    value           varchar(200)
+);
+
+DROP TABLE IF EXISTS setting_types;
+
+CREATE TABLE setting_types
+(
+    name       varchar(64) PRIMARY KEY,
+    class_name varchar(200)
 );
 
 DROP TABLE IF EXISTS transactions;
