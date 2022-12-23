@@ -4,7 +4,6 @@ import com.osh4.accounting.dto.AccountDto;
 import com.osh4.accounting.service.AccountService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -14,8 +13,7 @@ import reactor.core.publisher.Mono;
 @RequestMapping("/account")
 @Slf4j
 @AllArgsConstructor
-public class AccountController {
-
+public class AccountController extends BaseController {
     private final AccountService accountService;
 
     @GetMapping
@@ -31,21 +29,24 @@ public class AccountController {
     @PostMapping
     public Mono<ResponseEntity<String>> create(@RequestBody AccountDto accountDto) {
         return accountService.create(accountDto)
-                .flatMap(s -> Mono.just(ResponseEntity.accepted().contentType(MediaType.APPLICATION_JSON).body(s)))
-                .onErrorReturn(ResponseEntity.unprocessableEntity().body("Can't add the account"));
+                .flatMap(s -> successResponseCreate())
+                .doOnError(error -> log.error(error.getMessage(), error))
+                .onErrorReturn(failResponseCreate());
     }
 
     @PutMapping
     public Mono<ResponseEntity<String>> update(@RequestBody AccountDto accountDto) {
         return accountService.update(accountDto)
-                .flatMap(s -> Mono.just(ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(s)))
-                .onErrorReturn(ResponseEntity.unprocessableEntity().body("Can't update the account"));
+                .flatMap(s -> successResponseUpdate())
+                .doOnError(error -> log.error(error.getMessage(), error))
+                .onErrorReturn(failResponseUpdate());
     }
 
     @DeleteMapping
     public Mono<ResponseEntity<String>> delete(@RequestBody AccountDto accountDto) {
         return accountService.delete(accountDto)
-                .flatMap(s -> Mono.just(ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(s)))
-                .onErrorReturn(ResponseEntity.unprocessableEntity().body("Can't remove the account"));
+                .flatMap(s -> successResponseDelete())
+                .doOnError(error -> log.error(error.getMessage(), error))
+                .onErrorReturn(failResponseDelete());
     }
 }

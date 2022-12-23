@@ -1,7 +1,7 @@
 package com.osh4.accounting.controller;
 
-import com.osh4.accounting.dto.SettingDto;
-import com.osh4.accounting.service.SettingService;
+import com.osh4.accounting.dto.TransactionDto;
+import com.osh4.accounting.service.TransactionService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -10,49 +10,47 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/setting")
+@RequestMapping("/transaction")
 @Slf4j
 @AllArgsConstructor
-public class SettingController extends BaseController {
+public class TransactionController extends BaseController {
 
-    private final SettingService settingService;
+    private final TransactionService transactionService;
 
     @GetMapping
-    public Flux<SettingDto> getAll() {
-        return settingService.getAll();
+    public Flux<TransactionDto> getAll() {
+        return transactionService.getAll();
     }
 
     @GetMapping("/{id}")
-    public Mono<ResponseEntity<SettingDto>> get(@PathVariable String id) {
-        return settingService.get(id)
+    public Mono<ResponseEntity<TransactionDto>> get(@PathVariable String id) {
+        return transactionService.get(id)
                 .flatMap(this::successResponse)
                 .doOnError(error -> log.error(error.getMessage(), error))
                 .onErrorReturn(failResponse(null));
     }
 
     @PostMapping
-    public Mono<ResponseEntity<String>> create(@RequestBody SettingDto dto) {
-        return settingService.create(dto)
+    public Mono<ResponseEntity<String>> create(@RequestBody TransactionDto dto) {
+        return transactionService.create(dto)
                 .flatMap(s -> successResponseCreate())
                 .doOnError(error -> log.error(error.getMessage(), error))
                 .onErrorReturn(failResponseCreate());
     }
 
     @PutMapping
-    public Mono<ResponseEntity<String>> update(@RequestBody SettingDto dto) {
-        return settingService.update(dto)
+    public Mono<ResponseEntity<String>> update(@RequestBody TransactionDto dto) {
+        return transactionService.update(dto)
                 .flatMap(s -> successResponseUpdate())
                 .doOnError(error -> log.error(error.getMessage(), error))
                 .onErrorReturn(failResponseUpdate());
     }
 
-
     @DeleteMapping
-    public Mono<ResponseEntity<String>> delete(@RequestBody SettingDto dto) {
-        return settingService.delete(dto)
+    public Mono<ResponseEntity<String>> delete(@RequestBody TransactionDto dto) {
+        return transactionService.delete(dto)
                 .flatMap(s -> successResponseDelete())
                 .doOnError(error -> log.error(error.getMessage(), error))
                 .onErrorReturn(failResponseDelete());
     }
-
 }
