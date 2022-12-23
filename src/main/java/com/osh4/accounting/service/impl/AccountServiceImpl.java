@@ -7,8 +7,8 @@ import com.osh4.accounting.persistance.repository.AccountRepository;
 import com.osh4.accounting.service.AccountService;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -19,7 +19,7 @@ import static java.util.Objects.nonNull;
 public class AccountServiceImpl implements AccountService {
     private AccountRepository accountRepository;
     private Converter<Account, AccountDto> accountConverter;
-    private Converter<AccountDto, Mono<Account>> accountReverseConverter;
+    private Converter<AccountDto, Account> accountReverseConverter;
 
     @Override
     public Flux<AccountDto> getAll() {
@@ -30,45 +30,38 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public Mono<AccountDto> get(String id) {
         return accountRepository.findById(id)
-                .map(accountConverter::convert);
+                .map(accountConverter::convert)
+                .switchIfEmpty(Mono.error(new Exception()));
     }
 
     @Override
-    public Mono<String> create(AccountDto dto) {
-        return accountRepository.findById(dto.getId())
-                .flatMap(x -> Mono.error(new DuplicateKeyException("AlreadyExist")))
-                .switchIfEmpty(accountReverseConverter.convert(dto).flatMap(accountRepository::save))
-                .flatMap(x -> Mono.just("Add Success"));
+    public Mono<Account> create(AccountDto dto) {
+        return accountRepository.save(accountReverseConverter.convert(dto).setAsNew());
     }
-
 
     @Override
-    public Mono<String> update(AccountDto dto) {
+    @Transactional
+    public Mono<Void> update(AccountDto dto) {
         return accountRepository.findById(dto.getId())
-                .map(acc -> setValues(acc, dto))
-                .flatMap(x -> Mono.just("Successful update!"))
-                .switchIfEmpty(Mono.error(new Exception("Problems with update")));
+                .flatMap(model -> updateFields(model, dto))
+                .then();
     }
-
 
     @Override
-    public Mono<String> delete(AccountDto dto) {
-        return accountRepository.findById(dto.getId())
-                .map(accountRepository::delete)
-                .flatMap(x -> Mono.just("Successful remove!"))
-                .switchIfEmpty(Mono.error(new Exception("Problems with removal")));
+    public Mono<Void> delete(AccountDto dto) {
+        return accountRepository.deleteById(dto.getId());
     }
 
-    private Account setValues(Account acc, AccountDto dto) {
-        if (nonNull(dto.getName()) && ObjectUtils.notEqual(acc.getName(), dto.getName())) {
-            acc.setName(dto.getName());
+    private Mono<Account> updateFields(Account model, AccountDto dto) {
+        if (nonNull(dto.getName()) && ObjectUtils.notEqual(model.getName(), dto.getName())) {
+            model.setName(dto.getName());
         }
-        if (nonNull(dto.getDescription()) && ObjectUtils.notEqual(acc.getDescription(), dto.getDescription())) {
-            acc.setDescription(dto.getDescription());
+        if (nonNull(dto.getDescription()) && ObjectUtils.notEqual(model.getDescription(), dto.getDescription())) {
+            model.setDescription(dto.getDescription());
         }
-        if (nonNull(dto.getCurrency()) && ObjectUtils.notEqual(acc.getCurrencyId(), dto.getCurrency())) {
-            acc.setCurrencyId(dto.getCurrency().getId());
+        if (nonNull(dto.getCurrency()) && ObjectUtils.notEqual(model.getCurrencyId(), dto.getCurrency())) {
+            model.setCurrencyId(dto.getCurrency().getId());
         }
-        return acc;
+        return accountRepository.save(model);
     }
 }

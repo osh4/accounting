@@ -2,35 +2,33 @@ package com.osh4.accounting.service.impl;
 
 import com.osh4.accounting.converters.Converter;
 import com.osh4.accounting.dto.SettingDto;
+import com.osh4.accounting.dto.SettingTypeDto;
 import com.osh4.accounting.persistance.r2dbc.Setting;
+import com.osh4.accounting.persistance.r2dbc.SettingType;
 import com.osh4.accounting.persistance.repository.SettingRepository;
+import com.osh4.accounting.persistance.repository.SettingTypeRepository;
 import com.osh4.accounting.service.SettingService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DuplicateKeyException;
+import lombok.AllArgsConstructor;
+import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import static com.osh4.accounting.utils.Constants.SETTINGS_TYPES;
+import static java.util.Objects.nonNull;
 
 /**
  * @author osh4 <konstantin@osh4.com>
  */
 @Service
+@AllArgsConstructor
 public class SettingServiceImpl implements SettingService {
 
     private final SettingRepository settingRepository;
+    private final SettingTypeRepository settingTypeRepository;
     private final Converter<Setting, SettingDto> settingConverter;
-    private final Converter<SettingDto, Mono<Setting>> settingReverseConverter;
-
-    @Autowired
-    public SettingServiceImpl(SettingRepository settingRepository,
-                              Converter<Setting, SettingDto> settingConverter,
-                              Converter<SettingDto, Mono<Setting>> settingReverseConverter) {
-        this.settingRepository = settingRepository;
-        this.settingConverter = settingConverter;
-        this.settingReverseConverter = settingReverseConverter;
-    }
+    private final Converter<SettingDto, Setting> settingReverseConverter;
+    private final Converter<SettingType, SettingTypeDto> settingTypeConverter;
 
     @Override
     public Flux<SettingDto> getAll() {
@@ -38,43 +36,49 @@ public class SettingServiceImpl implements SettingService {
     }
 
     @Override
-    public Mono<SettingDto> getByKey(String key) {
-        return settingRepository.findByKey(key)
-                .map(settingConverter::convert);
+    public Mono<SettingDto> get(String id) {
+        return settingRepository.findById(id)
+                .map(settingConverter::convert)
+                .switchIfEmpty(Mono.error(new Exception()));
     }
 
     @Override
-    public Mono<String> create(SettingDto settingDto) {
-        return settingRepository.findByKey(settingDto.getKey())
-                .flatMap(x -> Mono.error(new DuplicateKeyException("AlreadyExist")))
-                .switchIfEmpty(settingReverseConverter.convert(settingDto).flatMap(settingRepository::save))
-                .flatMap(x -> Mono.just("Add Success"));
+    @Transactional
+    public Mono<Setting> create(SettingDto dto) {
+        return settingRepository.save(settingReverseConverter.convert(dto).setAsNew());
     }
 
     @Override
-    public Mono<String> update(SettingDto settingDto) {
-        return settingRepository.findByKey(settingDto.getKey())
-                .map(setting -> setValue(setting, settingDto))
-                .flatMap(x -> Mono.just("Successful update!"))
-                .switchIfEmpty(Mono.error(new Exception("Problems with update")));
+    @Transactional
+    public Mono<Void> update(SettingDto dto) {
+        return settingRepository.findById(dto.getKey())
+                .flatMap(setting -> updateFields(dto, setting))
+                .then();
     }
 
-    private Setting setValue(Setting settings, SettingDto dto) {
-        settings.setValue(dto.getValue());
-        settingRepository.save(settings).subscribe();
-        return settings;
-    }
-
-    @Override
-    public Mono<String> delete(SettingDto settingDto) {
-        return settingRepository.findByKey(settingDto.getKey())
-                .map(settingRepository::delete)
-                .flatMap(x -> Mono.just("Successful remove!"))
-                .switchIfEmpty(Mono.error(new Exception("Problems with removal")));
+    private Mono<Setting> updateFields(SettingDto dto, Setting setting) {
+        if (nonNull(dto) && ObjectUtils.notEqual(setting.getValue(), dto.getValue())) {
+            setting.setValue(dto.getValue());
+        }
+        if (nonNull(dto) && ObjectUtils.notEqual(setting.getType(), dto.getType())) {
+            setting.setType(dto.getType());
+        }
+        return settingRepository.save(setting);
     }
 
     @Override
-    public Flux<String> getAllTypes() {
-        return Flux.fromIterable(SETTINGS_TYPES);
+    @Transactional
+    public Mono<Void> delete(SettingDto dto) {
+        return settingRepository.deleteById(dto.getKey());
+    }
+
+    @Override
+    public Mono<SettingTypeDto> getType(String name) {
+        return settingTypeRepository.findById(name).map(settingTypeConverter::convert);
+    }
+
+    @Override
+    public Flux<SettingTypeDto> getAllTypes() {
+        return settingTypeRepository.findAll().map(settingTypeConverter::convert);
     }
 }

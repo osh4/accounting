@@ -1,6 +1,7 @@
 package com.osh4.accounting.service;
 
 import com.osh4.accounting.dto.TransactionTypeDto;
+import com.osh4.accounting.persistance.r2dbc.TransactionType;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -12,9 +13,9 @@ public interface TransactionTypeService {
 
     Mono<TransactionTypeDto> get(String id);
 
-    Mono<String> create(TransactionTypeDto dto);
+    Mono<TransactionType> create(TransactionTypeDto dto);
 
-    Mono<String> update(TransactionTypeDto dto);
+    Mono<Void> update(TransactionTypeDto dto);
 
-    Mono<String> delete(TransactionTypeDto dto);
+    Mono<Void> delete(TransactionTypeDto dto);
 }

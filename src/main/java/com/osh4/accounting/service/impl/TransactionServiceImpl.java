@@ -7,7 +7,6 @@ import com.osh4.accounting.persistance.repository.TransactionRepository;
 import com.osh4.accounting.service.TransactionService;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -22,7 +21,7 @@ import static java.util.Objects.nonNull;
 public class TransactionServiceImpl implements TransactionService {
     private TransactionRepository transactionRepository;
     private Converter<Transaction, TransactionDto> transactionConverter;
-    private Converter<TransactionDto, Mono<Transaction>> transactionReverseConverter;
+    private Converter<TransactionDto, Transaction> transactionReverseConverter;
 
     @Override
     public Flux<TransactionDto> getAll() {
@@ -33,35 +32,29 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public Mono<TransactionDto> get(String id) {
         return transactionRepository.findById(id)
-                .map(transactionConverter::convert);
+                .map(transactionConverter::convert)
+                .switchIfEmpty(Mono.error(new Exception()));
     }
 
     @Override
-    public Mono<String> create(TransactionDto dto) {
-        return transactionRepository.findById(dto.getId())
-                .flatMap(x -> Mono.error(new DuplicateKeyException("AlreadyExist")))
-                .switchIfEmpty(transactionReverseConverter.convert(dto).flatMap(transactionRepository::save))
-                .flatMap(x -> Mono.just("Add Success"));
+    public Mono<Transaction> create(TransactionDto dto) {
+        return transactionRepository.save(transactionReverseConverter.convert(dto).setAsNew());
     }
 
     @Override
-    public Mono<String> update(TransactionDto dto) {
+    public Mono<Void> update(TransactionDto dto) {
         return transactionRepository.findById(dto.getId())
-                .map(currency -> setValues(currency, dto))
-                .flatMap(x -> Mono.just("Successful update!"))
-                .switchIfEmpty(Mono.error(new Exception("Problems with update")));
+                .flatMap(model -> updateFields(model, dto))
+                .then();
     }
 
     @Override
-    public Mono<String> delete(TransactionDto dto) {
-        return transactionRepository.findById(dto.getId())
-                .map(transactionRepository::delete)
-                .flatMap(x -> Mono.just("Successful remove!"))
-                .switchIfEmpty(Mono.error(new Exception("Problems with removal")));
+    public Mono<Void> delete(TransactionDto dto) {
+        return transactionRepository.deleteById(dto.getId());
     }
 
 
-    private Transaction setValues(Transaction model, TransactionDto dto) {
+    private Mono<Transaction> updateFields(Transaction model, TransactionDto dto) {
         if (nonNull(dto.getDate()) && ObjectUtils.notEqual(dto.getDate(), model.getTransactionDate())) {
             model.setTransactionDate(dto.getDate());
         }
@@ -81,7 +74,7 @@ public class TransactionServiceImpl implements TransactionService {
             model.setTargetAccountId(dto.getTarget().getId());
         }
 
-        return model;
+        return transactionRepository.save(model);
     }
 
 }

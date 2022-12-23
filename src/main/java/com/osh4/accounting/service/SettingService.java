@@ -1,6 +1,8 @@
 package com.osh4.accounting.service;
 
 import com.osh4.accounting.dto.SettingDto;
+import com.osh4.accounting.dto.SettingTypeDto;
+import com.osh4.accounting.persistance.r2dbc.Setting;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -10,13 +12,15 @@ import reactor.core.publisher.Mono;
 public interface SettingService {
     Flux<SettingDto> getAll();
 
-    Mono<SettingDto> getByKey(String key);
+    Mono<SettingDto> get(String key);
 
-    Mono<String> create(SettingDto settingDto);
+    Mono<Setting> create(SettingDto settingDto);
 
-    Mono<String> update(SettingDto settingDto);
+    Mono<Void> update(SettingDto settingDto);
 
-    Mono<String> delete(SettingDto settingDto);
+    Mono<Void> delete(SettingDto settingDto);
 
-    Flux<String> getAllTypes();
+    Flux<SettingTypeDto> getAllTypes();
+
+    Mono<SettingTypeDto> getType(String name);
 }
