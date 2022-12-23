@@ -17,3 +17,6 @@ spring:
       enabled: true
       initial-size: 5
       max-size: 10
+app:
+  cors:
+    allowedOrigins: "http://localhost:4200"
