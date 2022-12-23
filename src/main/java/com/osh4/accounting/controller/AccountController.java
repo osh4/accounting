@@ -22,8 +22,11 @@ public class AccountController extends BaseController {
     }
 
     @GetMapping("/{id}")
-    public Mono<AccountDto> get(@PathVariable String id) {
-        return accountService.get(id);
+    public Mono<ResponseEntity<AccountDto>> get(@PathVariable String id) {
+        return accountService.get(id)
+                .flatMap(this::successResponse)
+                .doOnError(error -> log.error(error.getMessage(), error))
+                .onErrorReturn(failResponse());
     }
 
     @PostMapping

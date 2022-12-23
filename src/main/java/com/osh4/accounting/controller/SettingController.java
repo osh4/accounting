@@ -27,7 +27,7 @@ public class SettingController extends BaseController {
         return settingService.get(id)
                 .flatMap(this::successResponse)
                 .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponse(null));
+                .onErrorReturn(failResponse());
     }
 
     @PostMapping

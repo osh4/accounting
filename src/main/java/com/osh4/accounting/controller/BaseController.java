@@ -20,6 +20,9 @@ public class BaseController {
     protected <T> ResponseEntity<T> failResponse(T body) {
         return ResponseEntity.unprocessableEntity().body(body);
     }
+    protected <T> ResponseEntity<T> failResponse() {
+        return ResponseEntity.unprocessableEntity().build();
+    }
 
     protected String getEntityName() {
         return this.getClass().getName().replace("Controller", StringUtils.EMPTY);

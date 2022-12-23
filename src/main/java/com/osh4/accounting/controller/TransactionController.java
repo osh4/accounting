@@ -27,7 +27,7 @@ public class TransactionController extends BaseController {
         return transactionService.get(id)
                 .flatMap(this::successResponse)
                 .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponse(null));
+                .onErrorReturn(failResponse());
     }
 
     @PostMapping

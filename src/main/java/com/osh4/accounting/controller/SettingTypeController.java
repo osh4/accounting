@@ -24,7 +24,7 @@ public class SettingTypeController extends BaseController {
         return settingService.getType(name)
                 .flatMap(this::successResponse)
                 .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponse(null));
+                .onErrorReturn(failResponse());
     }
 
     @GetMapping()
