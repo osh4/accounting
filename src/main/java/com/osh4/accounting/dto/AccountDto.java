@@ -14,5 +14,5 @@ public class AccountDto {
     private String name;
     private String description;
     private CurrencyDto currency;
-    private String userId;
+    private UserDto user;
 }

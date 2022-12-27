@@ -20,7 +20,7 @@ public class AccountReverseConverter implements Converter<AccountDto, Account> {
                 .name(dto.getName())
                 .description(dto.getDescription())
                 .currencyId(dto.getCurrency().getId())
-                .userId(dto.getUserId())
+                .userId(dto.getUser().getId())
                 .build();
     }
 }
