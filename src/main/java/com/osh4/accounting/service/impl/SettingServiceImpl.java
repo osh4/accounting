@@ -10,6 +10,7 @@ import com.osh4.accounting.persistance.repository.SettingTypeRepository;
 import com.osh4.accounting.service.SettingService;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -31,8 +32,12 @@ public class SettingServiceImpl implements SettingService {
     private final Converter<SettingType, SettingTypeDto> settingTypeConverter;
 
     @Override
-    public Flux<SettingDto> getAll() {
-        return settingRepository.findAll().map(settingConverter::convert);
+    public Mono<Page<SettingDto>> getAll(PageRequest pageRequest) {
+        return settingRepository.findAllBy(pageRequest.withSort(Sort.by("key").descending()))
+                .map(settingConverter::convert)
+                .collectList()
+                .zipWith(settingRepository.count())
+                .map(t -> new PageImpl<>(t.getT1(), pageRequest, t.getT2()));
     }
 
     @Override
