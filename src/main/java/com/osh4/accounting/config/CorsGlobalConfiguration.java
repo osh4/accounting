@@ -12,7 +12,7 @@ import org.springframework.web.reactive.config.WebFluxConfigurer;
 @Configuration
 @EnableWebFlux
 public class CorsGlobalConfiguration implements WebFluxConfigurer {
-    @Value("${app.cors.allowedOrigins}:''")
+    @Value("${app.cors.allowedOrigins}")
     private String allowedOrigins;
 
     @Override
