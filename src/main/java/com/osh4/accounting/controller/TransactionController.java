@@ -4,9 +4,10 @@ import com.osh4.accounting.dto.TransactionDto;
 import com.osh4.accounting.service.TransactionService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -18,8 +19,9 @@ public class TransactionController extends BaseController {
     private final TransactionService transactionService;
 
     @GetMapping
-    public Flux<TransactionDto> getAll() {
-        return transactionService.getAll();
+    public Mono<Page<TransactionDto>> getAll(@RequestParam(defaultValue = "0") int page,
+                                             @RequestParam(defaultValue = "10") int size) {
+        return transactionService.getAll(PageRequest.of(page, size));
     }
 
     @GetMapping("/{id}")

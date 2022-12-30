@@ -2,7 +2,8 @@ package com.osh4.accounting.service;
 
 import com.osh4.accounting.dto.UserDto;
 import com.osh4.accounting.persistance.r2dbc.User;
-import reactor.core.publisher.Flux;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import reactor.core.publisher.Mono;
 
 /**
@@ -10,7 +11,7 @@ import reactor.core.publisher.Mono;
  */
 public interface UserService {
 
-    Flux<UserDto> getAll();
+    Mono<Page<UserDto>> getAll(PageRequest pageRequest);
 
     Mono<UserDto> get(String id);
 

@@ -2,12 +2,13 @@ package com.osh4.accounting.service;
 
 import com.osh4.accounting.dto.CurrencyDto;
 import com.osh4.accounting.persistance.r2dbc.Currency;
-import reactor.core.publisher.Flux;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import reactor.core.publisher.Mono;
 
 public interface CurrencyService {
 
-    Flux<CurrencyDto> getAll();
+    Mono<Page<CurrencyDto>> getAll(PageRequest pageRequest);
 
     Mono<CurrencyDto> get(String id);
 

@@ -7,8 +7,11 @@ import com.osh4.accounting.persistance.repository.CurrencyRepository;
 import com.osh4.accounting.service.CurrencyService;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static java.util.Objects.nonNull;
@@ -21,9 +24,12 @@ public class CurrencyServiceImpl implements CurrencyService {
     private Converter<CurrencyDto, Currency> currencyReverseConverter;
 
     @Override
-    public Flux<CurrencyDto> getAll() {
-        return currencyRepository.findAll()
-                .map(currencyConverter::convert);
+    public Mono<Page<CurrencyDto>> getAll(PageRequest pageRequest) {
+        return currencyRepository.findAllBy(pageRequest.withSort(Sort.by("id").descending()))
+                .map(currencyConverter::convert)
+                .collectList()
+                .zipWith(currencyRepository.count())
+                .map(t -> new PageImpl<>(t.getT1(), pageRequest, t.getT2()));
     }
 
     @Override

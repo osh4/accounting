@@ -7,8 +7,11 @@ import com.osh4.accounting.persistance.repository.UserRepository;
 import com.osh4.accounting.service.UserService;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static java.util.Objects.nonNull;
@@ -21,9 +24,12 @@ public class UserServiceImpl implements UserService {
     private Converter<UserDto, User> userReverseConverter;
 
     @Override
-    public Flux<UserDto> getAll() {
-        return userRepository.findAll()
-                .map(userConverter::convert);
+    public Mono<Page<UserDto>> getAll(PageRequest pageRequest) {
+        return userRepository.findAllBy(pageRequest.withSort(Sort.by("id").descending()))
+                .map(userConverter::convert)
+                .collectList()
+                .zipWith(userRepository.count())
+                .map(t -> new PageImpl<>(t.getT1(), pageRequest, t.getT2()));
     }
 
     @Override

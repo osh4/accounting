@@ -4,9 +4,10 @@ import com.osh4.accounting.dto.AccountDto;
 import com.osh4.accounting.service.AccountService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -17,8 +18,9 @@ public class AccountController extends BaseController {
     private final AccountService accountService;
 
     @GetMapping
-    public Flux<AccountDto> getAll() {
-        return accountService.getAll();
+    public Mono<Page<AccountDto>> getAll(@RequestParam(defaultValue = "0") int page,
+                                         @RequestParam(defaultValue = "10") int size) {
+        return accountService.getAll(PageRequest.of(page, size));
     }
 
     @GetMapping("/{id}")

@@ -2,7 +2,8 @@ package com.osh4.accounting.service;
 
 import com.osh4.accounting.dto.TransactionDto;
 import com.osh4.accounting.persistance.r2dbc.Transaction;
-import reactor.core.publisher.Flux;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import reactor.core.publisher.Mono;
 
 /**
@@ -10,7 +11,7 @@ import reactor.core.publisher.Mono;
  */
 public interface TransactionService {
 
-    Flux<TransactionDto> getAll();
+    Mono<Page<TransactionDto>> getAll(PageRequest pageRequest);
 
     Mono<TransactionDto> get(String id);
 

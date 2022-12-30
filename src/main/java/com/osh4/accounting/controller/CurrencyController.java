@@ -4,9 +4,10 @@ import com.osh4.accounting.dto.CurrencyDto;
 import com.osh4.accounting.service.CurrencyService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -18,8 +19,9 @@ public class CurrencyController extends BaseController {
     private final CurrencyService currencyService;
 
     @GetMapping
-    public Flux<CurrencyDto> getAll() {
-        return currencyService.getAll();
+    public Mono<Page<CurrencyDto>> getAll(@RequestParam(defaultValue = "0") int page,
+                                          @RequestParam(defaultValue = "10") int size) {
+        return currencyService.getAll(PageRequest.of(page, size));
     }
 
     @GetMapping("/{id}")

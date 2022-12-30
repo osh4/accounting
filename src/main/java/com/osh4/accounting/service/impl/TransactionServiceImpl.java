@@ -7,8 +7,11 @@ import com.osh4.accounting.persistance.repository.TransactionRepository;
 import com.osh4.accounting.service.TransactionService;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static java.util.Objects.nonNull;
@@ -24,9 +27,12 @@ public class TransactionServiceImpl implements TransactionService {
     private Converter<TransactionDto, Transaction> transactionReverseConverter;
 
     @Override
-    public Flux<TransactionDto> getAll() {
-        return transactionRepository.findAll()
-                .map(transactionConverter::convert);
+    public Mono<Page<TransactionDto>> getAll(PageRequest pageRequest) {
+        return transactionRepository.findAllBy(pageRequest.withSort(Sort.by("id").descending()))
+                .map(transactionConverter::convert)
+                .collectList()
+                .zipWith(transactionRepository.count())
+                .map(t -> new PageImpl<>(t.getT1(), pageRequest, t.getT2()));
     }
 
     @Override

@@ -7,9 +7,12 @@ import com.osh4.accounting.persistance.repository.AccountRepository;
 import com.osh4.accounting.service.AccountService;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static java.util.Objects.nonNull;
@@ -22,9 +25,12 @@ public class AccountServiceImpl implements AccountService {
     private Converter<AccountDto, Account> accountReverseConverter;
 
     @Override
-    public Flux<AccountDto> getAll() {
-        return accountRepository.findAll()
-                .map(accountConverter::convert);
+    public Mono<Page<AccountDto>> getAll(PageRequest pageRequest) {
+        return accountRepository.findAllBy(pageRequest.withSort(Sort.by("id").descending()))
+                .map(accountConverter::convert)
+                .collectList()
+                .zipWith(accountRepository.count())
+                .map(t -> new PageImpl<>(t.getT1(), pageRequest, t.getT2()));
     }
 
     @Override
