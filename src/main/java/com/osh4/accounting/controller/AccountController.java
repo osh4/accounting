@@ -19,8 +19,10 @@ public class AccountController extends BaseController {
 
     @GetMapping
     public Mono<Page<AccountDto>> getAll(@RequestParam(defaultValue = "0") int page,
-                                         @RequestParam(defaultValue = "10") int size) {
-        return accountService.getAll(PageRequest.of(page, size));
+                                         @RequestParam(defaultValue = "10") int size,
+                                         @RequestParam(defaultValue = "id_asc") String sort) {
+        PageRequest pageRequest = PageRequest.of(page, size, createSort(sort));
+        return accountService.getAll(pageRequest);
     }
 
     @GetMapping("/{id}")

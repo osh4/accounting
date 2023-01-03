@@ -10,7 +10,6 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -25,7 +24,7 @@ public class CurrencyServiceImpl implements CurrencyService {
 
     @Override
     public Mono<Page<CurrencyDto>> getAll(PageRequest pageRequest) {
-        return currencyRepository.findAllBy(pageRequest.withSort(Sort.by("id").descending()))
+        return currencyRepository.findAllBy(pageRequest)
                 .map(currencyConverter::convert)
                 .collectList()
                 .zipWith(currencyRepository.count())

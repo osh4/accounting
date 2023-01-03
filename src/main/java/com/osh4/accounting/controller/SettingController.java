@@ -20,8 +20,10 @@ public class SettingController extends BaseController {
 
     @GetMapping
     public Mono<Page<SettingDto>> getAll(@RequestParam(defaultValue = "0") int page,
-                                         @RequestParam(defaultValue = "10") int size) {
-        return settingService.getAll(PageRequest.of(page, size));
+                                         @RequestParam(defaultValue = "10") int size,
+                                         @RequestParam(defaultValue = "key_asc") String sort) {
+        PageRequest pageRequest = PageRequest.of(page, size, createSort(sort));
+        return settingService.getAll(pageRequest);
     }
 
     @GetMapping("/{id}")

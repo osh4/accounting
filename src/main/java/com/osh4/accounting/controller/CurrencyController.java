@@ -20,8 +20,10 @@ public class CurrencyController extends BaseController {
 
     @GetMapping
     public Mono<Page<CurrencyDto>> getAll(@RequestParam(defaultValue = "0") int page,
-                                          @RequestParam(defaultValue = "10") int size) {
-        return currencyService.getAll(PageRequest.of(page, size));
+                                          @RequestParam(defaultValue = "10") int size,
+                                          @RequestParam(defaultValue = "id_asc") String sort) {
+        PageRequest pageRequest = PageRequest.of(page, size, createSort(sort));
+        return currencyService.getAll(pageRequest);
     }
 
     @GetMapping("/{id}")

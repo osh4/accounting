@@ -10,7 +10,6 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
@@ -26,7 +25,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Mono<Page<AccountDto>> getAll(PageRequest pageRequest) {
-        return accountRepository.findAllBy(pageRequest.withSort(Sort.by("id").descending()))
+        return accountRepository.findAllBy(pageRequest)
                 .map(accountConverter::convert)
                 .collectList()
                 .zipWith(accountRepository.count())

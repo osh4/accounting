@@ -33,7 +33,7 @@ public class SettingServiceImpl implements SettingService {
 
     @Override
     public Mono<Page<SettingDto>> getAll(PageRequest pageRequest) {
-        return settingRepository.findAllBy(pageRequest.withSort(Sort.by("key").descending()))
+        return settingRepository.findAllBy(pageRequest)
                 .map(settingConverter::convert)
                 .collectList()
                 .zipWith(settingRepository.count())

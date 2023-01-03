@@ -10,7 +10,6 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -28,7 +27,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Mono<Page<TransactionDto>> getAll(PageRequest pageRequest) {
-        return transactionRepository.findAllBy(pageRequest.withSort(Sort.by("id").descending()))
+        return transactionRepository.findAllBy(pageRequest)
                 .map(transactionConverter::convert)
                 .collectList()
                 .zipWith(transactionRepository.count())

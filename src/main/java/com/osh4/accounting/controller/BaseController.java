@@ -1,6 +1,7 @@
 package com.osh4.accounting.controller;
 
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
@@ -50,5 +51,17 @@ public class BaseController {
 
     protected ResponseEntity<String> failResponseDelete() {
         return failResponse(MSG_DELETE_FAIL + MSG_THE + getEntityName());
+    }
+
+    protected static Sort createSort(String sortField) {
+        if (!StringUtils.contains(sortField, '_')) {
+            return Sort.by(sortField);
+        }
+        String[] sortParts = sortField.split("_");
+        Sort sort = Sort.by(sortParts[0]);
+        if (StringUtils.contains(sortParts[1], "desc")) {
+            return sort.descending();
+        }
+        return sort.ascending();
     }
 }
