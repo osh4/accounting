@@ -1,0 +1,22 @@
+server:
+  port: 8443
+  ssl:
+    key-store: ${SSL_KEY_STORE:classpath:keystore.p12}
+    key-store-password: ${SSL_KEY_STORE_PASSWORD:password}
+    key-store-type: ${SSL_KEY_STORE_TYPE:pkcs12}
+    key-alias: ${SSL_KEY_ALIAS:springboot}
+    key-password: ${SSL_KEY_PASSWORD:password}
+spring:
+  main:
+    banner-mode: off
+  r2dbc:
+    url: ${R2DBC_URL:r2dbc:postgresql://localhost:5432/accounting}
+    username: ${R2DBC_USERNAME:postgres}
+    password: ${R2DBC_PASSWORD:postgres}
+    pool:
+      enabled: true
+      initial-size: ${R2DBC_POOL_INITIAL_SIZE:5}
+      max-size: ${R2DBC_POOL_MAX_SIZE:10}
+app:
+  cors:
+    allowedOrigins: ${APP_CORS_ALLOWED_ORIGINS:"http://localhost:4200"}
