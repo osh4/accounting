@@ -17,7 +17,8 @@ public class CurrencyReverseConverter implements Converter<CurrencyDto, Currency
 
     @Override
     public Currency convert(CurrencyDto dto) {
-        return isNull(dto) ? null : Currency.builder().id(dto.getId())
+        return isNull(dto) ? null : Currency.builder()
+                .id(createIdIfNeeded(dto.getId()))
                 .name(dto.getName())
                 .isoCode(dto.getIsoCode())
                 .build();

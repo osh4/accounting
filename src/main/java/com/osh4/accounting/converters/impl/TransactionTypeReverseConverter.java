@@ -16,7 +16,7 @@ public class TransactionTypeReverseConverter implements Converter<TransactionTyp
     @Override
     public TransactionType convert(TransactionTypeDto dto) {
         return isNull(dto) ? null : TransactionType.builder()
-                .id(dto.getId())
+                .id(createIdIfNeeded(dto.getId()))
                 .name(dto.getName())
                 .description(dto.getDescription())
                 .build();

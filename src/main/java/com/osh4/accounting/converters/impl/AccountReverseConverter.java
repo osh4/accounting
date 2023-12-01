@@ -16,7 +16,7 @@ public class AccountReverseConverter implements Converter<AccountDto, Account> {
     @Override
     public Account convert(AccountDto dto) {
         return isNull(dto) ? null : Account.builder()
-                .id(dto.getId())
+                .id(createIdIfNeeded(dto.getId()))
                 .name(dto.getName())
                 .description(dto.getDescription())
                 .currencyId(dto.getCurrency().getId())

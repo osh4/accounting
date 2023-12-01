@@ -16,7 +16,7 @@ public class UserReverseConverter implements Converter<UserDto, User> {
     @Override
     public User convert(UserDto dto) {
         return isNull(dto) ? null : User.builder()
-                .id(dto.getId())
+                .id(createIdIfNeeded(dto.getId()))
                 .name(dto.getName())
                 .email(dto.getEmail())
                 .build();
