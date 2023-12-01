@@ -46,15 +46,15 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public Mono<Void> update(AccountDto dto) {
-        return accountRepository.findById(dto.getId())
+    public Mono<Void> update(String id, AccountDto dto) {
+        return accountRepository.findById(id)
                 .flatMap(model -> updateFields(model, dto))
                 .then();
     }
 
     @Override
-    public Mono<Void> delete(AccountDto dto) {
-        return accountRepository.deleteById(dto.getId());
+    public Mono<Void> delete(String id) {
+        return accountRepository.deleteById(id);
     }
 
     private Mono<Account> updateFields(Account model, AccountDto dto) {

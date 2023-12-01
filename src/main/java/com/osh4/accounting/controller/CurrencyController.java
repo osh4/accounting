@@ -35,24 +35,24 @@ public class CurrencyController extends BaseController {
     }
 
     @PostMapping
-    public Mono<ResponseEntity<String>> create(@RequestBody CurrencyDto currencyDto) {
-        return currencyService.create(currencyDto)
+    public Mono<ResponseEntity<String>> create(@RequestBody CurrencyDto dto) {
+        return currencyService.create(dto)
                 .flatMap(s -> successResponseCreate())
                 .doOnError(error -> log.error(error.getMessage(), error))
                 .onErrorReturn(failResponseCreate());
     }
 
-    @PutMapping
-    public Mono<ResponseEntity<String>> update(@RequestBody CurrencyDto currencyDto) {
-        return currencyService.update(currencyDto)
+    @PutMapping("/{id}")
+    public Mono<ResponseEntity<String>> update(@PathVariable String id, @RequestBody CurrencyDto dto) {
+        return currencyService.update(id, dto)
                 .flatMap(s -> successResponseUpdate())
                 .doOnError(error -> log.error(error.getMessage(), error))
                 .onErrorReturn(failResponseUpdate());
     }
 
-    @DeleteMapping
-    public Mono<ResponseEntity<String>> delete(@RequestBody CurrencyDto currencyDto) {
-        return currencyService.delete(currencyDto)
+    @DeleteMapping("/{id}")
+    public Mono<ResponseEntity<String>> delete(@PathVariable String id) {
+        return currencyService.delete(id)
                 .flatMap(s -> successResponseDelete())
                 .doOnError(error -> log.error(error.getMessage(), error))
                 .onErrorReturn(failResponseDelete());

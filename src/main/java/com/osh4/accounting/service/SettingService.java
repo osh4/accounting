@@ -18,9 +18,9 @@ public interface SettingService {
 
     Mono<Setting> create(SettingDto settingDto);
 
-    Mono<Void> update(SettingDto settingDto);
+    Mono<Void> update(String id, SettingDto settingDto);
 
-    Mono<Void> delete(SettingDto settingDto);
+    Mono<Void> delete(String id);
 
     Flux<SettingTypeDto> getAllTypes();
 

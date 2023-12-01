@@ -42,18 +42,18 @@ public class SettingController extends BaseController {
                 .onErrorReturn(failResponseCreate());
     }
 
-    @PutMapping
-    public Mono<ResponseEntity<String>> update(@RequestBody SettingDto dto) {
-        return settingService.update(dto)
+    @PutMapping("/{id}")
+    public Mono<ResponseEntity<String>> update(@PathVariable String id, @RequestBody SettingDto dto) {
+        return settingService.update(id, dto)
                 .flatMap(s -> successResponseUpdate())
                 .doOnError(error -> log.error(error.getMessage(), error))
                 .onErrorReturn(failResponseUpdate());
     }
 
 
-    @DeleteMapping
-    public Mono<ResponseEntity<String>> delete(@RequestBody SettingDto dto) {
-        return settingService.delete(dto)
+    @DeleteMapping("/{id}")
+    public Mono<ResponseEntity<String>> delete(@PathVariable String id) {
+        return settingService.delete(id)
                 .flatMap(s -> successResponseDelete())
                 .doOnError(error -> log.error(error.getMessage(), error))
                 .onErrorReturn(failResponseDelete());

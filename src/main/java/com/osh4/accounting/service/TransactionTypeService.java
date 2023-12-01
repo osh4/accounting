@@ -15,7 +15,7 @@ public interface TransactionTypeService {
 
     Mono<TransactionType> create(TransactionTypeDto dto);
 
-    Mono<Void> update(TransactionTypeDto dto);
+    Mono<Void> update(String id, TransactionTypeDto dto);
 
-    Mono<Void> delete(TransactionTypeDto dto);
+    Mono<Void> delete(String id);
 }

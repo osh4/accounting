@@ -55,8 +55,8 @@ public class SettingServiceImpl implements SettingService {
 
     @Override
     @Transactional
-    public Mono<Void> update(SettingDto dto) {
-        return settingRepository.findById(dto.getKey())
+    public Mono<Void> update(String id, SettingDto dto) {
+        return settingRepository.findById(id)
                 .flatMap(setting -> updateFields(dto, setting))
                 .then();
     }
@@ -73,8 +73,8 @@ public class SettingServiceImpl implements SettingService {
 
     @Override
     @Transactional
-    public Mono<Void> delete(SettingDto dto) {
-        return settingRepository.deleteById(dto.getKey());
+    public Mono<Void> delete(String id) {
+        return settingRepository.deleteById(id);
     }
 
     @Override

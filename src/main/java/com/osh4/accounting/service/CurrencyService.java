@@ -14,8 +14,8 @@ public interface CurrencyService {
 
     Mono<Currency> create(CurrencyDto dto);
 
-    Mono<Void> update(CurrencyDto dto);
+    Mono<Void> update(String id, CurrencyDto dto);
 
-    Mono<Void> delete(CurrencyDto dto);
+    Mono<Void> delete(String id);
 
 }

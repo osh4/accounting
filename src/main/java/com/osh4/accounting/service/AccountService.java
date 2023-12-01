@@ -13,7 +13,7 @@ public interface AccountService {
 
     Mono<Account> create(AccountDto dto);
 
-    Mono<Void> update(AccountDto dto);
+    Mono<Void> update(String id,AccountDto dto);
 
-    Mono<Void> delete(AccountDto dto);
+    Mono<Void> delete(String id);
 }

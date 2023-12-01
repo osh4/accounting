@@ -44,15 +44,15 @@ public class TransactionTypeServiceImpl implements TransactionTypeService {
 
 
     @Override
-    public Mono<Void> update(TransactionTypeDto dto) {
-        return transactionTypeRepository.findById(dto.getId())
+    public Mono<Void> update(String id, TransactionTypeDto dto) {
+        return transactionTypeRepository.findById(id)
                 .flatMap(model -> updateFields(model, dto))
                 .then();
     }
 
     @Override
-    public Mono<Void> delete(TransactionTypeDto dto) {
-        return transactionTypeRepository.deleteById(dto.getId());
+    public Mono<Void> delete(String id) {
+        return transactionTypeRepository.deleteById(id);
     }
 
     private Mono<TransactionType> updateFields(TransactionType model, TransactionTypeDto dto) {

@@ -45,15 +45,15 @@ public class CurrencyServiceImpl implements CurrencyService {
     }
 
     @Override
-    public Mono<Void> update(CurrencyDto dto) {
-        return currencyRepository.findById(dto.getId())
+    public Mono<Void> update(String id, CurrencyDto dto) {
+        return currencyRepository.findById(id)
                 .flatMap(model -> updateFields(model, dto))
                 .then();
     }
 
     @Override
-    public Mono<Void> delete(CurrencyDto dto) {
-        return currencyRepository.deleteById(dto.getId());
+    public Mono<Void> delete(String id) {
+        return currencyRepository.deleteById(id);
     }
 
     private Mono<Currency> updateFields(Currency model, CurrencyDto dto) {

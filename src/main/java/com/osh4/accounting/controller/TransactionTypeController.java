@@ -19,12 +19,12 @@ public class TransactionTypeController extends BaseController {
 
 
     @GetMapping()
-    public Flux<TransactionTypeDto> getAllTypes() {
+    public Flux<TransactionTypeDto> getAll() {
         return transactionTypeService.getAll();
     }
 
     @GetMapping("/{id}")
-    public Mono<ResponseEntity<TransactionTypeDto>> getType(@PathVariable String id) {
+    public Mono<ResponseEntity<TransactionTypeDto>> get(@PathVariable String id) {
         return transactionTypeService.get(id)
                 .flatMap(this::successResponse)
                 .doOnError(error -> log.error(error.getMessage(), error))
@@ -39,17 +39,17 @@ public class TransactionTypeController extends BaseController {
                 .onErrorReturn(failResponseCreate());
     }
 
-    @PutMapping
-    public Mono<ResponseEntity<String>> update(@RequestBody TransactionTypeDto dto) {
-        return transactionTypeService.update(dto)
+    @PutMapping("/{id}")
+    public Mono<ResponseEntity<String>> update(@PathVariable String id, @RequestBody TransactionTypeDto dto) {
+        return transactionTypeService.update(id, dto)
                 .flatMap(s -> successResponseUpdate())
                 .doOnError(error -> log.error(error.getMessage(), error))
                 .onErrorReturn(failResponseUpdate());
     }
 
-    @DeleteMapping
-    public Mono<ResponseEntity<String>> delete(@RequestBody TransactionTypeDto dto) {
-        return transactionTypeService.delete(dto)
+    @DeleteMapping("/{id}")
+    public Mono<ResponseEntity<String>> delete(@PathVariable String id) {
+        return transactionTypeService.delete(id)
                 .flatMap(s -> successResponseDelete())
                 .doOnError(error -> log.error(error.getMessage(), error))
                 .onErrorReturn(failResponseDelete());
