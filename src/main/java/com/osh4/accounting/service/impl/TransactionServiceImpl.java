@@ -13,7 +13,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * @author osh4 <konstantin@osh4.com>
@@ -60,22 +62,25 @@ public class TransactionServiceImpl implements TransactionService {
 
 
     private Mono<Transaction> updateFields(Transaction model, TransactionDto dto) {
+        if (isNull(dto)) {
+            return Mono.just(model);
+        }
         if (nonNull(dto.getDate()) && ObjectUtils.notEqual(dto.getDate(), model.getTransactionDate())) {
             model.setTransactionDate(dto.getDate());
         }
         if (nonNull(dto.getAmount()) && ObjectUtils.notEqual(dto.getAmount(), model.getAmount())) {
             model.setAmount(dto.getAmount());
         }
-        if (nonNull(dto.getDescription()) && ObjectUtils.notEqual(dto.getDescription(), model.getDescription())) {
+        if (isNotBlank(dto.getDescription()) && ObjectUtils.notEqual(dto.getDescription(), model.getDescription())) {
             model.setDescription(dto.getDescription());
         }
-        if (nonNull(dto.getType()) && ObjectUtils.notEqual(dto.getType().getId(), model.getTransactionTypeId())) {
+        if (nonNull(dto.getType()) && isNotBlank(dto.getType().getId()) && ObjectUtils.notEqual(dto.getType().getId(), model.getTransactionTypeId())) {
             model.setTransactionTypeId(dto.getType().getId());
         }
-        if (nonNull(dto.getSource()) && ObjectUtils.notEqual(dto.getSource().getId(), model.getSourceAccountId())) {
+        if (nonNull(dto.getSource()) && isNotBlank(dto.getSource().getId()) && ObjectUtils.notEqual(dto.getSource().getId(), model.getSourceAccountId())) {
             model.setSourceAccountId(dto.getSource().getId());
         }
-        if (nonNull(dto.getTarget()) && ObjectUtils.notEqual(dto.getTarget().getId(), model.getTargetAccountId())) {
+        if (nonNull(dto.getTarget()) && isNotBlank(dto.getTarget().getId()) && ObjectUtils.notEqual(dto.getTarget().getId(), model.getTargetAccountId())) {
             model.setTargetAccountId(dto.getTarget().getId());
         }
 

@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
+import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Service
 @AllArgsConstructor
@@ -58,13 +60,16 @@ public class AccountServiceImpl implements AccountService {
     }
 
     private Mono<Account> updateFields(Account model, AccountDto dto) {
-        if (nonNull(dto.getName()) && ObjectUtils.notEqual(model.getName(), dto.getName())) {
+        if (isNull(dto)) {
+            return Mono.just(model);
+        }
+        if (isNotBlank(dto.getName()) && ObjectUtils.notEqual(model.getName(), dto.getName())) {
             model.setName(dto.getName());
         }
-        if (nonNull(dto.getDescription()) && ObjectUtils.notEqual(model.getDescription(), dto.getDescription())) {
+        if (isNotBlank(dto.getDescription()) && ObjectUtils.notEqual(model.getDescription(), dto.getDescription())) {
             model.setDescription(dto.getDescription());
         }
-        if (nonNull(dto.getCurrency()) && ObjectUtils.notEqual(model.getCurrencyId(), dto.getCurrency())) {
+        if (nonNull(dto.getCurrency()) && isNotBlank(dto.getCurrency().getId()) && ObjectUtils.notEqual(model.getCurrencyId(), dto.getCurrency().getId())) {
             model.setCurrencyId(dto.getCurrency().getId());
         }
         return accountRepository.save(model);

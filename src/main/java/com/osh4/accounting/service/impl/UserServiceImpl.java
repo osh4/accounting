@@ -14,7 +14,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import static java.util.Objects.nonNull;
+import static java.util.Objects.isNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Service
 @AllArgsConstructor
@@ -57,10 +58,13 @@ public class UserServiceImpl implements UserService {
     }
 
     private Mono<User> updateFields(User model, UserDto dto) {
-        if (nonNull(dto.getName()) && ObjectUtils.notEqual(model.getName(), dto.getName())) {
+        if (isNull(dto)) {
+            return Mono.just(model);
+        }
+        if (isNotBlank(dto.getName()) && ObjectUtils.notEqual(model.getName(), dto.getName())) {
             model.setName(dto.getName());
         }
-        if (nonNull(dto.getEmail()) && ObjectUtils.notEqual(model.getEmail(), dto.getEmail())) {
+        if (isNotBlank(dto.getEmail()) && ObjectUtils.notEqual(model.getEmail(), dto.getEmail())) {
             model.setEmail(dto.getEmail());
         }
         return userRepository.save(model);

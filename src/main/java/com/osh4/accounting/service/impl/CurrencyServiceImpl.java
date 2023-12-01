@@ -13,7 +13,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
-import static java.util.Objects.nonNull;
+import static java.util.Objects.isNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Service
 @AllArgsConstructor
@@ -57,10 +58,13 @@ public class CurrencyServiceImpl implements CurrencyService {
     }
 
     private Mono<Currency> updateFields(Currency model, CurrencyDto dto) {
-        if (nonNull(dto.getIsoCode()) && ObjectUtils.notEqual(dto.getIsoCode(), model.getIsoCode())) {
+        if (isNull(dto)) {
+            return Mono.just(model);
+        }
+        if (isNotBlank(dto.getIsoCode()) && ObjectUtils.notEqual(dto.getIsoCode(), model.getIsoCode())) {
             model.setIsoCode(dto.getIsoCode());
         }
-        if (nonNull(dto.getName()) && ObjectUtils.notEqual(dto.getName(), model.getName())) {
+        if (isNotBlank(dto.getName()) && ObjectUtils.notEqual(dto.getName(), model.getName())) {
             model.setName(dto.getName());
         }
         return currencyRepository.save(model);

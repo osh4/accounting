@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import static java.util.Objects.nonNull;
+import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -62,14 +62,20 @@ public class SettingServiceImpl implements SettingService {
                 .then();
     }
 
-    private Mono<Setting> updateFields(SettingDto dto, Setting setting) {
-        if (nonNull(dto) && isNotBlank(dto.getValue()) && ObjectUtils.notEqual(setting.getValue(), dto.getValue())) {
-            setting.setValue(dto.getValue());
+    private Mono<Setting> updateFields(SettingDto dto, Setting model) {
+        if (isNull(dto)) {
+            return Mono.just(model);
         }
-        if (nonNull(dto) && isNotBlank(dto.getType()) && ObjectUtils.notEqual(setting.getType(), dto.getType())) {
-            setting.setType(dto.getType());
+        if (isNotBlank(dto.getKey()) && ObjectUtils.notEqual(model.getKey(), dto.getKey())) {
+            model.setValue(dto.getValue());
         }
-        return settingRepository.save(setting);
+        if (isNotBlank(dto.getValue()) && ObjectUtils.notEqual(model.getValue(), dto.getValue())) {
+            model.setValue(dto.getValue());
+        }
+        if (isNotBlank(dto.getType()) && ObjectUtils.notEqual(model.getType(), dto.getType())) {
+            model.setType(dto.getType());
+        }
+        return settingRepository.save(model);
     }
 
     @Override

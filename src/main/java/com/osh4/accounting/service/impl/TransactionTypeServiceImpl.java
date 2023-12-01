@@ -11,7 +11,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import static java.util.Objects.nonNull;
+import static java.util.Objects.isNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * @author osh4 <konstantin@osh4.com>
@@ -56,10 +57,13 @@ public class TransactionTypeServiceImpl implements TransactionTypeService {
     }
 
     private Mono<TransactionType> updateFields(TransactionType model, TransactionTypeDto dto) {
-        if (nonNull(dto.getName()) && ObjectUtils.notEqual(dto.getName(), model.getName())) {
+        if (isNull(dto)) {
+            return Mono.just(model);
+        }
+        if (isNotBlank(dto.getName()) && ObjectUtils.notEqual(dto.getName(), model.getName())) {
             model.setName(dto.getName());
         }
-        if (nonNull(dto.getDescription()) && ObjectUtils.notEqual(dto.getDescription(), model.getDescription())) {
+        if (isNotBlank(dto.getDescription()) && ObjectUtils.notEqual(dto.getDescription(), model.getDescription())) {
             model.setDescription(dto.getDescription());
         }
         return transactionTypeRepository.save(model);
