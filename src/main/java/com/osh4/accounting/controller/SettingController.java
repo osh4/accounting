@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/setting")
 @Slf4j
@@ -33,7 +35,7 @@ public class SettingController extends BaseController {
     }
 
     @PostMapping
-    public Mono<ResponseEntity<String>> create(@RequestBody SettingDto dto) {
+    public Mono<ResponseEntity<String>> create(@Valid @RequestBody SettingDto dto) {
         return settingService.create(dto)
                 .flatMap(s -> successResponseCreate())
                 .doOnError(error -> log.error(error.getMessage(), error))
@@ -41,7 +43,7 @@ public class SettingController extends BaseController {
     }
 
     @PutMapping("/{id}")
-    public Mono<ResponseEntity<String>> update(@PathVariable String id, @RequestBody SettingDto dto) {
+    public Mono<ResponseEntity<String>> update(@PathVariable String id, @Valid @RequestBody SettingDto dto) {
         return settingService.update(id, dto)
                 .flatMap(s -> successResponseUpdate())
                 .doOnError(error -> log.error(error.getMessage(), error))

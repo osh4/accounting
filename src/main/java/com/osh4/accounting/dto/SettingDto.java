@@ -13,10 +13,8 @@ import javax.validation.constraints.NotNull;
 @Builder(toBuilder = true)
 public class SettingDto
 {
-	@NotNull(message = "key cannot be null")
 	private String key;
-	@NotNull(message = "type cannot be null")
 	private String type;
-	@NotNull(message = "value cannot be null")
+	@NotNull
 	private String value;
 }
