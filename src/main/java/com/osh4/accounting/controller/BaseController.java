@@ -2,6 +2,7 @@ package com.osh4.accounting.controller;
 
 import com.osh4.accounting.service.PaginatedSearchService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import reactor.core.publisher.Mono;
@@ -12,8 +13,9 @@ import static org.apache.commons.lang3.StringUtils.SPACE;
 /**
  * @author osh4 <konstantin@osh4.com>
  */
-public abstract class BaseController {
+public class BaseController {
 
+    @Autowired
     protected PaginatedSearchService paginatedSearchService;
 
     protected <T> Mono<ResponseEntity<T>> successResponse(T body) {

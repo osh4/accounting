@@ -9,5 +9,6 @@ import org.springframework.data.domain.Sort;
 public interface PaginatedSearchService {
 
     PageRequest paginationInfo(int page, int size, String sort);
+
     Sort sortFromField(String sortField);
 }
