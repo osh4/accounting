@@ -10,8 +10,6 @@ import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 
-import static java.util.Objects.isNull;
-
 /**
  * @author osh4 <konstantin@osh4.com>
  */
@@ -22,8 +20,8 @@ public class AccountConverter implements Converter<Account, AccountDto> {
     private UserService userService;
 
     @Override
-    public AccountDto convert(Account model) {
-        return isNull(model) ? null : AccountDto.builder()
+    public AccountDto convertInternal(Account model) {
+       return AccountDto.builder()
                 .id(model.getId())
                 .name(model.getName())
                 .description(model.getDescription())

@@ -5,8 +5,6 @@ import com.osh4.accounting.dto.TransactionDto;
 import com.osh4.accounting.persistance.r2dbc.Transaction;
 import org.springframework.stereotype.Component;
 
-import static java.util.Objects.isNull;
-
 /**
  * @author osh4 <konstantin@osh4.com>
  */
@@ -14,8 +12,8 @@ import static java.util.Objects.isNull;
 public class TransactionReverseConverter implements Converter<TransactionDto, Transaction> {
 
     @Override
-    public Transaction convert(TransactionDto dto) {
-        return isNull(dto) ? null : Transaction.builder()
+    public Transaction convertInternal(TransactionDto dto) {
+        return Transaction.builder()
                 .id(createIdIfNeeded(dto.getId()))
                 .transactionDate(dto.getDate())
                 .amount(dto.getAmount())

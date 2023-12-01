@@ -8,8 +8,6 @@ import com.osh4.accounting.service.TransactionTypeService;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import static java.util.Objects.isNull;
-
 /**
  * @author osh4 <konstantin@osh4.com>
  */
@@ -20,8 +18,8 @@ public class TransactionConverter implements Converter<Transaction, TransactionD
     private AccountService accountService;
 
     @Override
-    public TransactionDto convert(Transaction model) {
-        return isNull(model) ? null : TransactionDto.builder()
+    public TransactionDto convertInternal(Transaction model) {
+        return TransactionDto.builder()
                 .id(model.getId())
                 .date(model.getTransactionDate())
                 .amount(model.getAmount())

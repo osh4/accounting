@@ -5,8 +5,6 @@ import com.osh4.accounting.dto.UserDto;
 import com.osh4.accounting.persistance.r2dbc.User;
 import org.springframework.stereotype.Component;
 
-import static java.util.Objects.isNull;
-
 /**
  * @author osh4 <konstantin@osh4.com>
  */
@@ -14,8 +12,8 @@ import static java.util.Objects.isNull;
 public class UserReverseConverter implements Converter<UserDto, User> {
 
     @Override
-    public User convert(UserDto dto) {
-        return isNull(dto) ? null : User.builder()
+    public User convertInternal(UserDto dto) {
+        return User.builder()
                 .id(createIdIfNeeded(dto.getId()))
                 .name(dto.getName())
                 .email(dto.getEmail())

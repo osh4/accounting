@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
@@ -14,7 +15,14 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 public interface Converter<SOURCE, TARGET>
 {
-	TARGET convert(SOURCE source);
+	default TARGET convert(SOURCE source){
+		if (isNull(source)) {
+			return null;
+		}
+		return convertInternal(source);
+	}
+
+	TARGET convertInternal(SOURCE source);
 
 	default List<TARGET> convertAll(List<SOURCE> sourceList)
 	{
