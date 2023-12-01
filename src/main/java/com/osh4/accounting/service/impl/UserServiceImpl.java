@@ -45,15 +45,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Mono<Void> update(UserDto dto) {
-        return userRepository.findById(dto.getId())
+    public Mono<Void> update(String id, UserDto dto) {
+        return userRepository.findById(id)
                 .flatMap(model -> updateFields(model, dto))
                 .then();
     }
 
     @Override
-    public Mono<Void> delete(UserDto dto) {
-        return userRepository.deleteById(dto.getId());
+    public Mono<Void> delete(String id) {
+        return userRepository.deleteById(id);
     }
 
     private Mono<User> updateFields(User model, UserDto dto) {

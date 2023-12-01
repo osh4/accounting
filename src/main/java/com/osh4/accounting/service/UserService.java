@@ -17,7 +17,7 @@ public interface UserService {
 
     Mono<User> create(UserDto dto);
 
-    Mono<Void> update(UserDto dto);
+    Mono<Void> update(String id, UserDto dto);
 
-    Mono<Void> delete(UserDto dto);
+    Mono<Void> delete(String id);
 }
