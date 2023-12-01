@@ -1,11 +1,11 @@
 package com.osh4.accounting.controller;
 
 import com.osh4.accounting.dto.TransactionDto;
+import com.osh4.accounting.service.PaginatedSearchService;
 import com.osh4.accounting.service.TransactionService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -17,13 +17,13 @@ import reactor.core.publisher.Mono;
 public class TransactionController extends BaseController {
 
     private final TransactionService transactionService;
+    private final PaginatedSearchService paginatedSearchService;
 
     @GetMapping
     public Mono<Page<TransactionDto>> getAll(@RequestParam(defaultValue = "0") int page,
                                              @RequestParam(defaultValue = "10") int size,
                                              @RequestParam(defaultValue = "id_asc") String sort) {
-        PageRequest pageRequest = PageRequest.of(page, size, createSort(sort));
-        return transactionService.getAll(pageRequest);
+        return transactionService.getAll(paginatedSearchService.paginationInfo(page, size, sort));
     }
 
     @GetMapping("/{id}")

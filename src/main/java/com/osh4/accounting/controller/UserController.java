@@ -1,11 +1,11 @@
 package com.osh4.accounting.controller;
 
 import com.osh4.accounting.dto.UserDto;
+import com.osh4.accounting.service.PaginatedSearchService;
 import com.osh4.accounting.service.UserService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -20,13 +20,13 @@ import reactor.core.publisher.Mono;
 public class UserController extends BaseController {
 
     private final UserService userService;
+    private final PaginatedSearchService paginatedSearchService;
 
     @GetMapping
     public Mono<Page<UserDto>> getAll(@RequestParam(defaultValue = "0") int page,
                                       @RequestParam(defaultValue = "10") int size,
                                       @RequestParam(defaultValue = "id_asc") String sort) {
-        PageRequest pageRequest = PageRequest.of(page, size, createSort(sort));
-        return userService.getAll(pageRequest);
+        return userService.getAll(paginatedSearchService.paginationInfo(page, size, sort));
     }
 
     @GetMapping("/{id}")

@@ -2,10 +2,10 @@ package com.osh4.accounting.controller;
 
 import com.osh4.accounting.dto.AccountDto;
 import com.osh4.accounting.service.AccountService;
+import com.osh4.accounting.service.PaginatedSearchService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
@@ -16,13 +16,13 @@ import reactor.core.publisher.Mono;
 @AllArgsConstructor
 public class AccountController extends BaseController {
     private final AccountService accountService;
+    private final PaginatedSearchService paginatedSearchService;
 
     @GetMapping
     public Mono<Page<AccountDto>> getAll(@RequestParam(defaultValue = "0") int page,
                                          @RequestParam(defaultValue = "10") int size,
                                          @RequestParam(defaultValue = "id_asc") String sort) {
-        PageRequest pageRequest = PageRequest.of(page, size, createSort(sort));
-        return accountService.getAll(pageRequest);
+        return accountService.getAll(paginatedSearchService.paginationInfo(page, size, sort));
     }
 
     @GetMapping("/{id}")
