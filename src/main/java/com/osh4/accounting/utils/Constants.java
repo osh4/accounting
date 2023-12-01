@@ -7,11 +7,11 @@ public class Constants {
 
     public static final String MSG_DELETE_SUCCESS = "Successfully";
     public static final String MSG_UPDATE_SUCCESS = "was successfully updated!";
-    public static final String MSG_CREATE_SUCCESS = " was successfully created!";
+    public static final String MSG_CREATE_SUCCESS = "was successfully created!";
     public static final String MSG_UPDATE_FAIL = "Can't update";
     public static final String MSG_CREATE_FAIL = "Can't create";
     public static final String MSG_DELETE_FAIL = "Can't delete";
-    public static final String MSG_THE = " the ";
+    public static final String MSG_THE = "The";
 
     public static Locale ru_RU = new Locale("ru", "RU");
     public static Locale ru = new Locale("ru", "");
