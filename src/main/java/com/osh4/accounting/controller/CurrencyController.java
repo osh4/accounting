@@ -2,7 +2,6 @@ package com.osh4.accounting.controller;
 
 import com.osh4.accounting.dto.CurrencyDto;
 import com.osh4.accounting.service.CurrencyService;
-import com.osh4.accounting.service.PaginatedSearchService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -17,7 +16,6 @@ import reactor.core.publisher.Mono;
 public class CurrencyController extends BaseController {
 
     private final CurrencyService currencyService;
-    private final PaginatedSearchService paginatedSearchService;
 
     @GetMapping
     public Mono<Page<CurrencyDto>> getAll(@RequestParam(defaultValue = "0") int page,

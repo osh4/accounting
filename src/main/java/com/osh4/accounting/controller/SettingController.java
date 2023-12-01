@@ -1,7 +1,6 @@
 package com.osh4.accounting.controller;
 
 import com.osh4.accounting.dto.SettingDto;
-import com.osh4.accounting.service.PaginatedSearchService;
 import com.osh4.accounting.service.SettingService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +16,6 @@ import reactor.core.publisher.Mono;
 public class SettingController extends BaseController {
 
     private final SettingService settingService;
-    private final PaginatedSearchService paginatedSearchService;
 
     @GetMapping
     public Mono<Page<SettingDto>> getAll(@RequestParam(defaultValue = "0") int page,

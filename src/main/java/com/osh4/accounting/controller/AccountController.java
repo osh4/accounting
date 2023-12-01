@@ -2,7 +2,6 @@ package com.osh4.accounting.controller;
 
 import com.osh4.accounting.dto.AccountDto;
 import com.osh4.accounting.service.AccountService;
-import com.osh4.accounting.service.PaginatedSearchService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -16,7 +15,7 @@ import reactor.core.publisher.Mono;
 @AllArgsConstructor
 public class AccountController extends BaseController {
     private final AccountService accountService;
-    private final PaginatedSearchService paginatedSearchService;
+//    private final PaginatedSearchService paginatedSearchService;
 
     @GetMapping
     public Mono<Page<AccountDto>> getAll(@RequestParam(defaultValue = "0") int page,
