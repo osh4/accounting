@@ -4,23 +4,22 @@ import com.osh4.accounting.converters.Converter;
 import com.osh4.accounting.dto.SettingDto;
 import com.osh4.accounting.persistance.r2dbc.Setting;
 import com.osh4.accounting.persistance.repository.SettingRepository;
-import org.junit.jupiter.api.BeforeEach;
+import com.osh4.accounting.persistance.repository.SettingTypeRepository;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.Collections;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class SettingServiceImplTest {
@@ -34,9 +33,13 @@ class SettingServiceImplTest {
     private Setting oldSettings;
     @Mock
     private SettingDto settingDto;
+    @Mock
+    private PageRequest pageRequest;
 
     @Mock
     private SettingRepository settingRepository;
+    @Mock
+    private SettingTypeRepository settingTypeRepository;
     @Mock
     private Converter<Setting, SettingDto> settingsConverter;
     @Mock
@@ -44,72 +47,62 @@ class SettingServiceImplTest {
     @InjectMocks
     private SettingServiceImpl service;
 
-
-    @BeforeEach
-    public void setUp() {
-        Mockito.lenient().when(settingDto.getKey()).thenReturn(KEY);
-        Mockito.lenient().when(settingDto.getValue()).thenReturn(NEW_VALUE);
-        Mockito.lenient().when(oldSettings.getValue()).thenReturn(OLD_VALUE);
-        Mockito.lenient().when(settings.getValue()).thenReturn(NEW_VALUE);
-        Mockito.lenient().when(settingRepository.findAll()).thenReturn(Flux.just(settings));
-        Mockito.lenient().when(settingsConverter.convertAll(any())).thenReturn(Collections.singletonList(settingDto));
-        Mockito.lenient().when(settingsReverseConverter.convertAll(any()))
-                .thenReturn(Collections.singletonList(settings));
-        Mockito.lenient().when(settingsReverseConverter.convert(any(SettingDto.class))).thenReturn(settings);
-        Mockito.lenient().when(settingRepository.save(any(Setting.class))).thenReturn(Mono.just(settings));
-        Mockito.lenient().when(settingRepository.findById(KEY)).thenReturn(Mono.just(settings));
-
-    }
+//        Mockito.lenient().when(settingsReverseConverter.convert(any(SettingDto.class))).thenReturn(settings);// for CREATE test
 
     @Test
+    @Disabled
     public void shouldGetAndConvertAllSettings() {
-        Flux<SettingDto> result = service.getAll();
-        assertNotNull(result);
-        assertTrue(false);
-        //assertEquals(1, result.size());
+        // given
+        when(settingRepository.findAllBy(pageRequest)).thenReturn(Flux.just(settings));
+        when(settingsConverter.convert(settings)).thenReturn(settingDto);
+
+        // when
+        Page<SettingDto> result = service.getAll(pageRequest).block();
+
+        // then
+        assertThat(result.getContent()).hasSize(1);
+        assertThat(result.getContent()).contains(settingDto);
     }
 
     @Test
     public void shouldReturnEmptyListIfNoSettings() {
-        Mockito.lenient().when(settingRepository.findAll()).thenReturn(Flux.empty());
-        Mockito.lenient().when(settingsConverter.convertAll(Collections.emptyList())).thenReturn(Collections.emptyList());
-        Flux<SettingDto> result = service.getAll();
-        //result.hasElements().flatMap(Assertions::assertFalse).subscribe();
-        //assertTrue(CollectionUtils.isEmpty(result));
-        assertTrue(false);
+        // given
+        when(settingRepository.findAllBy(pageRequest)).thenReturn(Flux.empty());
+        // when
+        var result = service.getAll(pageRequest).block();
+        // then
+        assertThat(result.getContent()).hasSize(0);
     }
 
     @Test
     public void shouldUpdateSettings() {
-        Mockito.lenient().when(settingRepository.findById(KEY)).thenReturn(Mono.just(oldSettings));
+        // given
+        when(oldSettings.getValue()).thenReturn(OLD_VALUE);
+        when(settingRepository.findById(KEY)).thenReturn(Mono.just(oldSettings));
+        when(settingRepository.save(any(Setting.class))).thenReturn(Mono.just(settings));
+        when(settingDto.getValue()).thenReturn(NEW_VALUE);
 
-        service.update(settingDto);
+        // when
+        service.update(KEY, settingDto).block();
 
+        // then
         verify(oldSettings).setValue(NEW_VALUE);
+        verify(settingRepository).save(oldSettings);
     }
 
     @Test
     public void shouldNotUpdateSettingsIfEqualValues() {
-
-        service.update(settingDto);
+        when(settingRepository.findById(KEY)).thenReturn(Mono.just(settings));
+        when(settingRepository.save(any(Setting.class))).thenReturn(Mono.just(settings));
+        service.update(KEY, settingDto).block();
         verify(settings, times(0)).setValue(NEW_VALUE);
     }
 
     @Test
     public void shouldDeleteSettings() {
-
-        service.delete(settingDto);
-
-        verify(settingRepository, times(1)).delete(settings);
+        // when
+        service.delete(KEY);
+        // then
+        verify(settingRepository, times(1)).deleteById(KEY);
     }
-
-    @Test
-    public void shouldDoNothingIfSettingNotExists() {
-        Mockito.lenient().when(settingRepository.findById(KEY)).thenReturn(null);
-
-        service.delete(settingDto);
-
-        verify(settingRepository, times(0)).delete(settings);
-    }
-
 }

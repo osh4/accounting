@@ -37,8 +37,7 @@ public class SettingServiceImpl implements SettingService {
         return settingRepository.findAllBy(pageRequest)
                 .map(settingConverter::convert)
                 .collectList()
-                .zipWith(settingRepository.count())
-                .map(t -> new PageImpl<>(t.getT1(), pageRequest, t.getT2()));
+                .map(t -> new PageImpl<>(t, pageRequest, t.size()));
     }
 
     @Override
@@ -67,7 +66,7 @@ public class SettingServiceImpl implements SettingService {
             return Mono.just(model);
         }
         if (isNotBlank(dto.getKey()) && ObjectUtils.notEqual(model.getKey(), dto.getKey())) {
-            model.setValue(dto.getValue());
+            model.setKey(dto.getKey());
         }
         if (isNotBlank(dto.getValue()) && ObjectUtils.notEqual(model.getValue(), dto.getValue())) {
             model.setValue(dto.getValue());
