@@ -17,6 +17,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * @author osh4 <konstantin@osh4.com>
@@ -62,10 +63,10 @@ public class SettingServiceImpl implements SettingService {
     }
 
     private Mono<Setting> updateFields(SettingDto dto, Setting setting) {
-        if (nonNull(dto) && ObjectUtils.notEqual(setting.getValue(), dto.getValue())) {
+        if (nonNull(dto) && isNotBlank(dto.getValue()) && ObjectUtils.notEqual(setting.getValue(), dto.getValue())) {
             setting.setValue(dto.getValue());
         }
-        if (nonNull(dto) && ObjectUtils.notEqual(setting.getType(), dto.getType())) {
+        if (nonNull(dto) && isNotBlank(dto.getType()) && ObjectUtils.notEqual(setting.getType(), dto.getType())) {
             setting.setType(dto.getType());
         }
         return settingRepository.save(setting);
