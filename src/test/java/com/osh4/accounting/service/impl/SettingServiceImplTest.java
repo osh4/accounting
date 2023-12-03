@@ -1,6 +1,5 @@
 package com.osh4.accounting.service.impl;
 
-import com.osh4.accounting.converters.Converter;
 import com.osh4.accounting.converters.impl.SettingMapper;
 import com.osh4.accounting.dto.SettingDto;
 import com.osh4.accounting.persistance.r2dbc.Setting;
@@ -42,8 +41,6 @@ class SettingServiceImplTest {
     private SettingTypeRepository settingTypeRepository;
     @Mock
     private SettingMapper settingMapper;
-    @Mock
-    private Converter<SettingDto, Setting> settingsReverseConverter;
     @InjectMocks
     private SettingServiceImpl service;
 
