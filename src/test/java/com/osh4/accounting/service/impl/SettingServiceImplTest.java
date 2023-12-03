@@ -5,7 +5,6 @@ import com.osh4.accounting.dto.SettingDto;
 import com.osh4.accounting.persistance.r2dbc.Setting;
 import com.osh4.accounting.persistance.repository.SettingRepository;
 import com.osh4.accounting.persistance.repository.SettingTypeRepository;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -47,7 +46,6 @@ class SettingServiceImplTest {
 //        Mockito.lenient().when(settingsReverseConverter.convert(any(SettingDto.class))).thenReturn(settings);// for CREATE test
 
     @Test
-    @Disabled
     public void shouldGetAndConvertAllSettings() {
         // given
         when(settingRepository.findAllBy(pageRequest)).thenReturn(Flux.just(settings));
@@ -57,8 +55,8 @@ class SettingServiceImplTest {
         Page<SettingDto> result = service.getAll(pageRequest).block();
 
         // then
-        assertThat(result.getContent()).hasSize(1);
-        assertThat(result.getContent()).contains(settingDto);
+        assertThat(result.getContent()).hasSize(1)
+                .contains(settingDto);
     }
 
     @Test
