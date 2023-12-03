@@ -1,6 +1,6 @@
 package com.osh4.accounting.service.impl;
 
-import com.osh4.accounting.converters.Converter;
+import com.osh4.accounting.converters.impl.UserMapper;
 import com.osh4.accounting.dto.UserDto;
 import com.osh4.accounting.persistance.r2dbc.User;
 import com.osh4.accounting.persistance.repository.UserRepository;
@@ -21,13 +21,12 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
-    private Converter<User, UserDto> userConverter;
-    private Converter<UserDto, User> userReverseConverter;
+    private UserMapper userMapper;
 
     @Override
     public Mono<Page<UserDto>> getAll(PageRequest pageRequest) {
         return userRepository.findAllBy(pageRequest.withSort(Sort.by("id").descending()))
-                .map(userConverter::convert)
+                .map(userMapper::toDto)
                 .collectList()
                 .zipWith(userRepository.count())
                 .map(t -> new PageImpl<>(t.getT1(), pageRequest, t.getT2()));
@@ -36,13 +35,13 @@ public class UserServiceImpl implements UserService {
     @Override
     public Mono<UserDto> get(String id) {
         return userRepository.findById(id)
-                .map(userConverter::convert)
+                .map(userMapper::toDto)
                 .switchIfEmpty(Mono.error(new Exception()));
     }
 
     @Override
     public Mono<User> create(UserDto dto) {
-        return userRepository.save(userReverseConverter.convert(dto).setAsNew());
+        return userRepository.save(userMapper.toModel(dto).setAsNew());
     }
 
     @Override

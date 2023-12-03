@@ -14,10 +14,10 @@ import java.time.LocalDate;
 @Builder(toBuilder = true)
 public class TransactionDto {
     private String id;
-    private LocalDate date;
+    private LocalDate transactionDate;
     private BigDecimal amount;
     private String description;
-    private TransactionTypeDto type;
-    private AccountDto source;
-    private AccountDto target;
+    private TransactionTypeDto transactionType;
+    private AccountDto sourceAccount;
+    private AccountDto targetAccount;
 }

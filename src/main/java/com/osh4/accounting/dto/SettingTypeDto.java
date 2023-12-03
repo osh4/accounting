@@ -15,6 +15,7 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @Builder(toBuilder = true)
 public class SettingTypeDto {
+    private String id;
     @NotNull(message = "name cannot be null")
     private String name;
     @NotNull(message = "className cannot be null")

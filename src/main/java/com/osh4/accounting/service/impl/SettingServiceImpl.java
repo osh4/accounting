@@ -1,22 +1,25 @@
 package com.osh4.accounting.service.impl;
 
-import com.osh4.accounting.converters.Converter;
+import com.osh4.accounting.converters.impl.SettingMapper;
+import com.osh4.accounting.converters.impl.SettingTypeMapper;
 import com.osh4.accounting.dto.SettingDto;
 import com.osh4.accounting.dto.SettingTypeDto;
 import com.osh4.accounting.persistance.r2dbc.Setting;
-import com.osh4.accounting.persistance.r2dbc.SettingType;
 import com.osh4.accounting.persistance.repository.SettingRepository;
 import com.osh4.accounting.persistance.repository.SettingTypeRepository;
 import com.osh4.accounting.service.SettingService;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -28,14 +31,13 @@ public class SettingServiceImpl implements SettingService {
 
     private final SettingRepository settingRepository;
     private final SettingTypeRepository settingTypeRepository;
-    private final Converter<Setting, SettingDto> settingConverter;
-    private final Converter<SettingDto, Setting> settingReverseConverter;
-    private final Converter<SettingType, SettingTypeDto> settingTypeConverter;
+    private SettingTypeMapper settingTypeMapper;
+    private SettingMapper settingMapper;
 
     @Override
     public Mono<Page<SettingDto>> getAll(PageRequest pageRequest) {
         return settingRepository.findAllBy(pageRequest)
-                .map(settingConverter::convert)
+                .map(settingMapper::toDto)
                 .collectList()
                 .map(t -> new PageImpl<>(t, pageRequest, t.size()));
     }
@@ -43,14 +45,14 @@ public class SettingServiceImpl implements SettingService {
     @Override
     public Mono<SettingDto> get(String id) {
         return settingRepository.findById(id)
-                .map(settingConverter::convert)
+                .map(settingMapper::toDto)
                 .switchIfEmpty(Mono.error(new Exception()));
     }
 
     @Override
     @Transactional
     public Mono<Setting> create(SettingDto dto) {
-        return settingRepository.save(settingReverseConverter.convert(dto).setAsNew());
+        return settingRepository.save(settingMapper.toModel(dto).setAsNew());
     }
 
     @Override
@@ -71,8 +73,8 @@ public class SettingServiceImpl implements SettingService {
         if (isNotBlank(dto.getValue()) && ObjectUtils.notEqual(model.getValue(), dto.getValue())) {
             model.setValue(dto.getValue());
         }
-        if (isNotBlank(dto.getType()) && ObjectUtils.notEqual(model.getType(), dto.getType())) {
-            model.setType(dto.getType());
+        if (nonNull(dto.getSettingType()) && isNotBlank(dto.getSettingType().getId()) && ObjectUtils.notEqual(model.getSettingTypeId(), dto.getSettingType().getId())) {
+            model.setSettingTypeId(dto.getSettingType().getId());
         }
         return settingRepository.save(model);
     }
@@ -85,11 +87,11 @@ public class SettingServiceImpl implements SettingService {
 
     @Override
     public Mono<SettingTypeDto> getType(String name) {
-        return settingTypeRepository.findById(name).map(settingTypeConverter::convert);
+        return settingTypeRepository.findById(name).map(settingTypeMapper::toDto);
     }
 
     @Override
     public Flux<SettingTypeDto> getAllTypes() {
-        return settingTypeRepository.findAll().map(settingTypeConverter::convert);
+        return settingTypeRepository.findAll().map(settingTypeMapper::toDto);
     }
 }

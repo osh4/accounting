@@ -1,6 +1,6 @@
 package com.osh4.accounting.service.impl;
 
-import com.osh4.accounting.converters.Converter;
+import com.osh4.accounting.converters.impl.TransactionTypeMapper;
 import com.osh4.accounting.dto.TransactionTypeDto;
 import com.osh4.accounting.persistance.r2dbc.TransactionType;
 import com.osh4.accounting.persistance.repository.TransactionTypeRepository;
@@ -21,26 +21,24 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @AllArgsConstructor
 public class TransactionTypeServiceImpl implements TransactionTypeService {
     private TransactionTypeRepository transactionTypeRepository;
-    private Converter<TransactionType, TransactionTypeDto> transactionTypeConverter;
-    private Converter<TransactionTypeDto, TransactionType> transactionTypeReverseConverter;
-
+    private TransactionTypeMapper transactionTypeMapper;
 
     @Override
     public Flux<TransactionTypeDto> getAll() {
-        return transactionTypeRepository.findAll().map(transactionTypeConverter::convert);
+        return transactionTypeRepository.findAll().map(transactionTypeMapper::toDto);
     }
 
 
     @Override
     public Mono<TransactionTypeDto> get(String id) {
         return transactionTypeRepository.findById(id)
-                .map(transactionTypeConverter::convert)
+                .map(transactionTypeMapper::toDto)
                 .switchIfEmpty(Mono.error(new Exception()));
     }
 
     @Override
     public Mono<TransactionType> create(TransactionTypeDto dto) {
-        return transactionTypeRepository.save(transactionTypeReverseConverter.convert(dto).setAsNew());
+        return transactionTypeRepository.save(transactionTypeMapper.toModel(dto).setAsNew());
     }
 
 

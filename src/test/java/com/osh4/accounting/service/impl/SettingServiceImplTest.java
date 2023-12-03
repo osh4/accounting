@@ -1,6 +1,7 @@
 package com.osh4.accounting.service.impl;
 
 import com.osh4.accounting.converters.Converter;
+import com.osh4.accounting.converters.impl.SettingMapper;
 import com.osh4.accounting.dto.SettingDto;
 import com.osh4.accounting.persistance.r2dbc.Setting;
 import com.osh4.accounting.persistance.repository.SettingRepository;
@@ -10,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -41,7 +41,7 @@ class SettingServiceImplTest {
     @Mock
     private SettingTypeRepository settingTypeRepository;
     @Mock
-    private Converter<Setting, SettingDto> settingsConverter;
+    private SettingMapper settingMapper;
     @Mock
     private Converter<SettingDto, Setting> settingsReverseConverter;
     @InjectMocks
@@ -54,7 +54,7 @@ class SettingServiceImplTest {
     public void shouldGetAndConvertAllSettings() {
         // given
         when(settingRepository.findAllBy(pageRequest)).thenReturn(Flux.just(settings));
-        when(settingsConverter.convert(settings)).thenReturn(settingDto);
+        when(settingMapper.toDto(settings)).thenReturn(settingDto);
 
         // when
         Page<SettingDto> result = service.getAll(pageRequest).block();

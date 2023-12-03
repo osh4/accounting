@@ -14,7 +14,7 @@ import javax.validation.constraints.NotNull;
 public class SettingDto
 {
 	private String key;
-	private String type;
+	private SettingTypeDto settingType;
 	@NotNull
 	private String value;
 }

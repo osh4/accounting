@@ -1,6 +1,6 @@
 package com.osh4.accounting.service.impl;
 
-import com.osh4.accounting.converters.Converter;
+import com.osh4.accounting.converters.impl.CurrencyMapper;
 import com.osh4.accounting.dto.CurrencyDto;
 import com.osh4.accounting.persistance.r2dbc.Currency;
 import com.osh4.accounting.persistance.repository.CurrencyRepository;
@@ -20,13 +20,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @AllArgsConstructor
 public class CurrencyServiceImpl implements CurrencyService {
     private CurrencyRepository currencyRepository;
-    private Converter<Currency, CurrencyDto> currencyConverter;
-    private Converter<CurrencyDto, Currency> currencyReverseConverter;
-
+    private CurrencyMapper currencyMapper;
     @Override
     public Mono<Page<CurrencyDto>> getAll(PageRequest pageRequest) {
         return currencyRepository.findAllBy(pageRequest)
-                .map(currencyConverter::convert)
+                .map(currencyMapper::toDto)
                 .collectList()
                 .zipWith(currencyRepository.count())
                 .map(t -> new PageImpl<>(t.getT1(), pageRequest, t.getT2()));
@@ -35,14 +33,14 @@ public class CurrencyServiceImpl implements CurrencyService {
     @Override
     public Mono<CurrencyDto> get(String id) {
         return currencyRepository.findById(id)
-                .map(currencyConverter::convert)
+                .map(currencyMapper::toDto)
                 .switchIfEmpty(Mono.error(new Exception()));
     }
 
 
     @Override
     public Mono<Currency> create(CurrencyDto dto) {
-        return currencyRepository.save(currencyReverseConverter.convert(dto).setAsNew());
+        return currencyRepository.save(currencyMapper.toModel(dto).setAsNew());
     }
 
     @Override

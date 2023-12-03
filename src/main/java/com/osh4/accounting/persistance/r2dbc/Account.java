@@ -21,7 +21,11 @@ public class Account implements Persistable<String> {
     private String id;
     private String name;
     private String description;
+    @Transient
+    private Currency currency;
     private String currencyId;
+    @Transient
+    private User user;
     private String userId;
     @Transient
     private boolean isNewEntity;
