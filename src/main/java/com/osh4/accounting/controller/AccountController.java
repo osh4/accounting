@@ -15,7 +15,6 @@ import reactor.core.publisher.Mono;
 @AllArgsConstructor
 public class AccountController extends BaseController {
     private final AccountService accountService;
-//    private final PaginatedSearchService paginatedSearchService;
 
     @GetMapping
     public Mono<Page<AccountDto>> getAll(@RequestParam(defaultValue = "0") int page,
