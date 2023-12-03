@@ -16,6 +16,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
+import java.time.LocalDate;
+import java.util.List;
+
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -30,7 +33,6 @@ public class TransactionServiceImpl implements TransactionService {
     private TransactionTypeRepository transactionTypeRepository;
     private AccountRepository accountRepository;
     private TransactionMapper transactionMapper;
-//    private AccountService accountService;
 
     @Override
     public Mono<Page<TransactionDto>> getAll(PageRequest pageRequest) {
@@ -76,16 +78,18 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Mono<Transaction> create(TransactionDto dto) {
-//        String sourceAccountId = dto.getSourceAccount().getId();
-//        AccountDto sourceAccountDto = accountService.get(sourceAccountId).block();
-//        dto.setSourceAccount(sourceAccountDto);
-//        AccountDto targetAccountDto = accountService.get(dto.getTargetAccount().getId()).block();
-//        dto.setTargetAccount(targetAccountDto);
-//
-        Transaction model = transactionMapper.toModel(dto).setAsNew();
+    public Mono<List<TransactionDto>> get(LocalDate from, LocalDate to) {
+        return transactionRepository.findAllByTransactionDateBetween(from, to)
+                .flatMap(this::populateTransactionType)
+                .flatMap(this::populateSourceAccount)
+                .flatMap(this::populateTargetAccount)
+                .map(transactionMapper::toDto)
+                .collectList();
+    }
 
-        return transactionRepository.save(model);
+    @Override
+    public Mono<Transaction> create(TransactionDto dto) {
+        return transactionRepository.save(transactionMapper.toModel(dto).setAsNew());
     }
 
     @Override

@@ -6,7 +6,11 @@ import org.springframework.data.repository.reactive.ReactiveCrudRepository;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 
+import java.time.LocalDate;
+
 @Repository
 public interface TransactionRepository extends ReactiveCrudRepository<Transaction, String> {
     Flux<Transaction> findAllBy(Pageable pageable);
+
+    Flux<Transaction> findAllByTransactionDateBetween(LocalDate from, LocalDate to);
 }
