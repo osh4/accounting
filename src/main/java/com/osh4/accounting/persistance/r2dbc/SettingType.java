@@ -18,15 +18,11 @@ import static java.util.Objects.isNull;
 @Builder(toBuilder = true)
 public class SettingType implements Persistable<String> {
     @Id
+    private String id;
     private String name;
     private String className;
     @Transient
     private boolean isNewEntity;
-
-    @Override
-    public String getId() {
-        return getName();
-    }
 
     @Override
     public boolean isNew() {

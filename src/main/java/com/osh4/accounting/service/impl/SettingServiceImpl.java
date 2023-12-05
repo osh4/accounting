@@ -10,6 +10,7 @@ import com.osh4.accounting.persistance.repository.SettingTypeRepository;
 import com.osh4.accounting.service.SettingService;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
+import org.reactivestreams.Publisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -37,9 +38,18 @@ public class SettingServiceImpl implements SettingService {
     @Override
     public Mono<Page<SettingDto>> getAll(PageRequest pageRequest) {
         return settingRepository.findAllBy(pageRequest)
+                .flatMap(this::populateSettingType)
                 .map(settingMapper::toDto)
                 .collectList()
                 .map(t -> new PageImpl<>(t, pageRequest, t.size()));
+    }
+
+    private Publisher<? extends Setting> populateSettingType(Setting setting) {
+        return settingTypeRepository.findById(setting.getSettingTypeId())
+                .map(settingType -> {
+                    setting.setSettingType(settingType);
+                    return setting;
+                });
     }
 
     @Override

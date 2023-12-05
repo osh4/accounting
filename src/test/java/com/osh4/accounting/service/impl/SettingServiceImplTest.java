@@ -3,6 +3,7 @@ package com.osh4.accounting.service.impl;
 import com.osh4.accounting.converters.impl.SettingMapper;
 import com.osh4.accounting.dto.SettingDto;
 import com.osh4.accounting.persistance.r2dbc.Setting;
+import com.osh4.accounting.persistance.r2dbc.SettingType;
 import com.osh4.accounting.persistance.repository.SettingRepository;
 import com.osh4.accounting.persistance.repository.SettingTypeRepository;
 import org.junit.jupiter.api.Test;
@@ -28,6 +29,8 @@ class SettingServiceImplTest {
     @Mock
     private Setting settings;
     @Mock
+    private SettingType settingType;
+    @Mock
     private Setting oldSettings;
     @Mock
     private SettingDto settingDto;
@@ -49,6 +52,7 @@ class SettingServiceImplTest {
     public void shouldGetAndConvertAllSettings() {
         // given
         when(settingRepository.findAllBy(pageRequest)).thenReturn(Flux.just(settings));
+        when(settingTypeRepository.findById(settings.getSettingTypeId())).thenReturn(Mono.just(settingType));
         when(settingMapper.toDto(settings)).thenReturn(settingDto);
 
         // when
