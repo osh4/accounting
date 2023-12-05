@@ -1,0 +1,22 @@
+server:
+  port: 8443
+  ssl:
+    key-store: classpath:keystore.p12
+    key-store-password: password
+    key-store-type: pkcs12
+    key-alias: springboot
+    key-password: password
+spring:
+  main:
+    banner-mode: off
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/accounting
+    username: postgres
+    password: postgres
+    pool:
+      enabled: true
+      initial-size: 5
+      max-size: 10
+app:
+  cors:
+    allowedOrigins: "http://localhost:4200"
