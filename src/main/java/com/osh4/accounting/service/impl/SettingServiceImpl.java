@@ -4,16 +4,17 @@ import com.osh4.accounting.converters.impl.SettingMapper;
 import com.osh4.accounting.converters.impl.SettingTypeMapper;
 import com.osh4.accounting.dto.SettingDto;
 import com.osh4.accounting.dto.SettingTypeDto;
+import com.osh4.accounting.exception.NotFoundException;
 import com.osh4.accounting.persistance.r2dbc.Setting;
 import com.osh4.accounting.persistance.repository.SettingRepository;
 import com.osh4.accounting.persistance.repository.SettingTypeRepository;
 import com.osh4.accounting.service.SettingService;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
-import org.reactivestreams.Publisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
@@ -37,18 +38,33 @@ public class SettingServiceImpl implements SettingService {
 
     @Override
     public Mono<Page<SettingDto>> getAll(PageRequest pageRequest) {
+        Sort sort = pageRequest.getSort();
+        if (nonNull(sort) && sort.stream().anyMatch(x -> "settingType".equals(x.getProperty()))) {
+            pageRequest.withSort(createSort(sort));
+        }
         return settingRepository.findAllBy(pageRequest)
-                .flatMap(this::populateSettingType)
                 .map(settingMapper::toDto)
+                .flatMap(this::populateSettingType)
                 .collectList()
-                .map(t -> new PageImpl<>(t, pageRequest, t.size()));
+                .zipWith(settingRepository.count())
+                .map(t -> new PageImpl<>(t.getT1(), pageRequest, t.getT2()));
     }
 
-    private Publisher<? extends Setting> populateSettingType(Setting setting) {
-        return settingTypeRepository.findById(setting.getSettingTypeId())
+    private static Sort createSort(Sort sort) {
+        Sort.Order oldSortOrder = sort.getOrderFor("settingType");
+        if (oldSortOrder != null && Sort.Direction.ASC.equals(oldSortOrder.getDirection())) {
+            return Sort.by("settingTypeId").ascending();
+        } else {
+            return Sort.by("settingTypeId").descending();
+        }
+    }
+
+    private Mono<SettingDto> populateSettingType(SettingDto dto) {
+        return settingTypeRepository.findById(dto.getSettingType().getId())
+                .map(settingTypeMapper::toDto)
                 .map(settingType -> {
-                    setting.setSettingType(settingType);
-                    return setting;
+                    dto.setSettingType(settingType);
+                    return dto;
                 });
     }
 
@@ -56,21 +72,30 @@ public class SettingServiceImpl implements SettingService {
     public Mono<SettingDto> get(String id) {
         return settingRepository.findById(id)
                 .map(settingMapper::toDto)
-                .switchIfEmpty(Mono.error(new Exception()));
+                .flatMap(this::populateSettingType)
+                .switchIfEmpty(Mono.error(new NotFoundException("Setting not found")));
+    }
+
+    @Override
+    public Mono<SettingDto> get(String id, String defaultValue) {
+        return settingRepository.findById(id)
+                .map(settingMapper::toDto)
+                .flatMap(this::populateSettingType)
+                .switchIfEmpty(Mono.just(SettingDto.builder().key(id).value(defaultValue).build()));
     }
 
     @Override
     @Transactional
-    public Mono<Setting> create(SettingDto dto) {
-        return settingRepository.save(settingMapper.toModel(dto).setAsNew());
+    public Mono<SettingDto> create(SettingDto dto) {
+        return settingRepository.save(settingMapper.toModel(dto).setAsNew()).map(settingMapper::toDto);
     }
 
     @Override
     @Transactional
-    public Mono<Void> update(String id, SettingDto dto) {
+    public Mono<SettingDto> update(String id, SettingDto dto) {
         return settingRepository.findById(id)
                 .flatMap(setting -> updateFields(dto, setting))
-                .then();
+                .map(settingMapper::toDto);
     }
 
     private Mono<Setting> updateFields(SettingDto dto, Setting model) {

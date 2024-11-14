@@ -20,8 +20,6 @@ public class Setting implements Persistable<String> {
     @Id
     private String key;
     private String settingTypeId;
-    @Transient
-    private SettingType settingType;
     private String value;
     @Transient
     private boolean isNewEntity;

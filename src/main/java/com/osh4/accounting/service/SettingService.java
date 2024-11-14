@@ -16,9 +16,11 @@ public interface SettingService {
 
     Mono<SettingDto> get(String key);
 
-    Mono<Setting> create(SettingDto settingDto);
+    Mono<SettingDto> get(String id, String defaultValue);
 
-    Mono<Void> update(String id, SettingDto settingDto);
+    Mono<SettingDto> create(SettingDto settingDto);
+
+    Mono<SettingDto> update(String id, SettingDto settingDto);
 
     Mono<Void> delete(String id);
 

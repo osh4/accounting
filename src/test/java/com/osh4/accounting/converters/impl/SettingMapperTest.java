@@ -3,7 +3,6 @@ package com.osh4.accounting.converters.impl;
 import com.osh4.accounting.dto.SettingDto;
 import com.osh4.accounting.dto.SettingTypeDto;
 import com.osh4.accounting.persistance.r2dbc.Setting;
-import com.osh4.accounting.persistance.r2dbc.SettingType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,43 +17,41 @@ class SettingMapperTest {
 
     private static final String KEY = "key";
     private static final String VALUE = "value";
+    private static final String SETTING_TYPE_ID = "settingTypeId";
 
     @Mock
     private Setting settings;
     @Mock
-    private SettingType settingType;
-    @Mock
     private SettingTypeDto settingTypeDto;
     @Mock
     private SettingDto settingDto;
-    @Mock
-    private SettingTypeMapperImpl settingTypeMapper;
     @InjectMocks
     private SettingMapperImpl settingMapper;
 
     @Test
     public void shouldPopulateFields() {
-        when(settingTypeMapper.toDto(settingType)).thenReturn(settingTypeDto);
         when(settings.getKey()).thenReturn(KEY);
-        when(settings.getSettingType()).thenReturn(settingType);
+        when(settings.getSettingTypeId()).thenReturn(SETTING_TYPE_ID);
         when(settings.getValue()).thenReturn(VALUE);
 
         SettingDto result = settingMapper.toDto(settings);
+
         assertEquals(KEY, result.getKey());
-        assertEquals(settingTypeDto, result.getSettingType());
+        assertEquals(SETTING_TYPE_ID, result.getSettingType().getId());
         assertEquals(VALUE, result.getValue());
     }
 
     @Test
     public void shouldReversePopulateFields() {
-        when(settingTypeMapper.toModel(settingTypeDto)).thenReturn(settingType);
+        when(settingTypeDto.getId()).thenReturn(SETTING_TYPE_ID);
         when(settingDto.getKey()).thenReturn(KEY);
         when(settingDto.getSettingType()).thenReturn(settingTypeDto);
         when(settingDto.getValue()).thenReturn(VALUE);
 
         Setting result = settingMapper.toModel(settingDto);
+
         assertEquals(KEY, result.getKey());
-        assertEquals(settingType, result.getSettingType());
+        assertEquals(SETTING_TYPE_ID, result.getSettingTypeId());
         assertEquals(VALUE, result.getValue());
     }
 }

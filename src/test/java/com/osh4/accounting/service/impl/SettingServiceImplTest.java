@@ -13,10 +13,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.stream.Stream;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -25,6 +29,11 @@ class SettingServiceImplTest {
     private static final String KEY = "key";
     private static final String OLD_VALUE = "oldValue";
     private static final String NEW_VALUE = "newValue";
+    private static final String SETTING_TYPE_ID = "settingTypeId";
+    private static final Long RECORDS_COUNT = 10L;
+    private static final Sort DESC_SETTING_TYPE_ID_SORT = Sort.by("settingTypeId").descending();
+    private static final Sort ASC_SETTING_TYPE_ID_SORT = Sort.by("settingTypeId").ascending();
+    private static final Sort.Order ASC_SETTING_TYPE_SORT_ORDER = Sort.Order.asc("settingType");
 
     @Mock
     private Setting settings;
@@ -36,6 +45,8 @@ class SettingServiceImplTest {
     private SettingDto settingDto;
     @Mock
     private PageRequest pageRequest;
+    @Mock
+    private Sort sort;
 
     @Mock
     private SettingRepository settingRepository;
@@ -46,30 +57,66 @@ class SettingServiceImplTest {
     @InjectMocks
     private SettingServiceImpl service;
 
-//        Mockito.lenient().when(settingsReverseConverter.convert(any(SettingDto.class))).thenReturn(settings);// for CREATE test
-
     @Test
     public void shouldGetAndConvertAllSettings() {
         // given
+        when(settings.getSettingTypeId()).thenReturn(SETTING_TYPE_ID);
         when(settingRepository.findAllBy(pageRequest)).thenReturn(Flux.just(settings));
-        when(settingTypeRepository.findById(settings.getSettingTypeId())).thenReturn(Mono.just(settingType));
+        when(settingTypeRepository.findById(SETTING_TYPE_ID)).thenReturn(Mono.just(settingType));
         when(settingMapper.toDto(settings)).thenReturn(settingDto);
+        when(settingRepository.count()).thenReturn(Mono.just(RECORDS_COUNT));
 
         // when
         Page<SettingDto> result = service.getAll(pageRequest).block();
 
         // then
+        assertThat(result).isNotEmpty();
         assertThat(result.getContent()).hasSize(1)
                 .contains(settingDto);
+    }
+
+    @Test
+    public void shouldUseDescSortWhenConvertAllSettings() {
+        // given
+        when(pageRequest.getSort()).thenReturn(sort);
+        when(sort.stream()).thenReturn(Stream.of(Sort.Order.desc("settingType")));
+        when(settingRepository.findAllBy(pageRequest)).thenReturn(Flux.empty());
+        when(settingRepository.count()).thenReturn(Mono.just(RECORDS_COUNT));
+
+        // when
+        Page<SettingDto> result = service.getAll(pageRequest).block();
+
+        // then
+        verify(pageRequest).withSort(DESC_SETTING_TYPE_ID_SORT);
+    }
+
+    @Test
+    public void shouldUseAscSortWhenConvertAllSettings() {
+        // given
+        when(pageRequest.getSort()).thenReturn(sort);
+        when(sort.stream()).thenReturn(Stream.of(Sort.Order.asc("settingType")));
+        when(settingRepository.findAllBy(pageRequest)).thenReturn(Flux.empty());
+        when(settingRepository.count()).thenReturn(Mono.just(RECORDS_COUNT));
+        when(sort.getOrderFor("settingType")).thenReturn(ASC_SETTING_TYPE_SORT_ORDER);
+
+        // when
+        Page<SettingDto> result = service.getAll(pageRequest).block();
+
+        // then
+        verify(pageRequest).withSort(ASC_SETTING_TYPE_ID_SORT);
     }
 
     @Test
     public void shouldReturnEmptyListIfNoSettings() {
         // given
         when(settingRepository.findAllBy(pageRequest)).thenReturn(Flux.empty());
+        when(settingRepository.count()).thenReturn(Mono.just(RECORDS_COUNT));
+
         // when
         var result = service.getAll(pageRequest).block();
+
         // then
+        assertNotNull(result);
         assertThat(result.getContent()).hasSize(0);
     }
 
@@ -80,6 +127,7 @@ class SettingServiceImplTest {
         when(settingRepository.findById(KEY)).thenReturn(Mono.just(oldSettings));
         when(settingRepository.save(any(Setting.class))).thenReturn(Mono.just(settings));
         when(settingDto.getValue()).thenReturn(NEW_VALUE);
+        when(settingMapper.toDto(settings)).thenReturn(settingDto);
 
         // when
         service.update(KEY, settingDto).block();
@@ -91,9 +139,15 @@ class SettingServiceImplTest {
 
     @Test
     public void shouldNotUpdateSettingsIfEqualValues() {
+        // given
         when(settingRepository.findById(KEY)).thenReturn(Mono.just(settings));
         when(settingRepository.save(any(Setting.class))).thenReturn(Mono.just(settings));
+        when(settingMapper.toDto(settings)).thenReturn(settingDto);
+
+        // when
         service.update(KEY, settingDto).block();
+
+        // then
         verify(settings, times(0)).setValue(NEW_VALUE);
     }
 
@@ -101,6 +155,7 @@ class SettingServiceImplTest {
     public void shouldDeleteSettings() {
         // when
         service.delete(KEY);
+
         // then
         verify(settingRepository, times(1)).deleteById(KEY);
     }
