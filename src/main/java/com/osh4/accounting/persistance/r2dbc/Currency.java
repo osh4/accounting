@@ -21,6 +21,7 @@ public class Currency implements Persistable<String> {
     private String id;
     private String isoCode;
     private String name;
+    private String longName;
     @Transient
     private boolean isNewEntity;
 

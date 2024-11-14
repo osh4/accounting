@@ -13,4 +13,5 @@ public class CurrencyDto {
     private String id;
     private String isoCode;
     private String name;
+    private String longName;
 }
