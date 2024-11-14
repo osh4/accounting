@@ -14,9 +14,10 @@ DROP TABLE IF EXISTS currencies;
 
 CREATE TABLE currencies
 (
-    id       varchar(200) PRIMARY KEY,
-    iso_code varchar(255),
-    name     varchar(255)
+    id        varchar(200) PRIMARY KEY,
+    iso_code  varchar(255),
+    name      varchar(255),
+    long_name varchar(255)
 );
 
 DROP TABLE IF EXISTS rates;
@@ -52,13 +53,14 @@ DROP TABLE IF EXISTS transactions;
 
 CREATE TABLE transactions
 (
-    id                  varchar(200) PRIMARY KEY,
-    transaction_date    date,
-    amount              decimal(10, 2),
-    description         varchar(200),
-    transaction_type_id varchar(200),
-    source_account_id   varchar(200),
-    target_account_id   varchar(200)
+    id                      varchar(200) PRIMARY KEY,
+    transaction_date        date,
+    amount                  decimal(10, 2),
+    description             varchar(200),
+    transaction_type_id     varchar(200),
+    transaction_category_id varchar(200),
+    source_account_id       varchar(200),
+    target_account_id       varchar(200)
 );
 
 DROP TABLE IF EXISTS transactions_types;
@@ -81,5 +83,15 @@ CREATE TABLE users
     roles         varchar(64)[],
     created_date  date,
     modified_date date
+);
+
+DROP TABLE IF EXISTS transactions_categories;
+
+CREATE TABLE transactions_categories
+(
+    id          varchar(200) PRIMARY KEY,
+    name        varchar(200),
+    description varchar(200),
+    color       varchar(200)
 );
 
