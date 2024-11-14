@@ -32,6 +32,14 @@ public class CurrencyController extends BaseController {
                 .onErrorReturn(failResponse());
     }
 
+    @GetMapping("/isocode/{isocode}")
+    public Mono<ResponseEntity<CurrencyDto>> getByIsocode(@PathVariable String isocode) {
+        return currencyService.getByIsocode(isocode)
+                .flatMap(this::successResponse)
+                .doOnError(error -> log.error(error.getMessage(), error))
+                .onErrorReturn(failResponse());
+    }
+
     @PostMapping
     public Mono<ResponseEntity<String>> create(@RequestBody CurrencyDto dto) {
         return currencyService.create(dto)
@@ -41,11 +49,11 @@ public class CurrencyController extends BaseController {
     }
 
     @PutMapping("/{id}")
-    public Mono<ResponseEntity<String>> update(@PathVariable String id, @RequestBody CurrencyDto dto) {
+    public Mono<ResponseEntity<CurrencyDto>> update(@PathVariable String id, @RequestBody CurrencyDto dto) {
         return currencyService.update(id, dto)
-                .flatMap(s -> successResponseUpdate())
+                .flatMap(this::successResponse)
                 .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponseUpdate());
+                .onErrorReturn(failResponse());
     }
 
     @DeleteMapping("/{id}")

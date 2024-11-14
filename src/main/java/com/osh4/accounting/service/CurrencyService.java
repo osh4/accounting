@@ -12,9 +12,11 @@ public interface CurrencyService {
 
     Mono<CurrencyDto> get(String id);
 
+    Mono<CurrencyDto> getByIsocode(String isocode);
+
     Mono<Currency> create(CurrencyDto dto);
 
-    Mono<Void> update(String id, CurrencyDto dto);
+    Mono<CurrencyDto> update(String id, CurrencyDto dto);
 
     Mono<Void> delete(String id);
 

@@ -21,6 +21,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class CurrencyServiceImpl implements CurrencyService {
     private CurrencyRepository currencyRepository;
     private CurrencyMapper currencyMapper;
+
     @Override
     public Mono<Page<CurrencyDto>> getAll(PageRequest pageRequest) {
         return currencyRepository.findAllBy(pageRequest)
@@ -37,6 +38,12 @@ public class CurrencyServiceImpl implements CurrencyService {
                 .switchIfEmpty(Mono.error(new Exception()));
     }
 
+    @Override
+    public Mono<CurrencyDto> getByIsocode(String isocode) {
+        return currencyRepository.findByIsoCode(isocode)
+                .map(currencyMapper::toDto)
+                .switchIfEmpty(Mono.error(new Exception()));
+    }
 
     @Override
     public Mono<Currency> create(CurrencyDto dto) {
@@ -44,10 +51,10 @@ public class CurrencyServiceImpl implements CurrencyService {
     }
 
     @Override
-    public Mono<Void> update(String id, CurrencyDto dto) {
+    public Mono<CurrencyDto> update(String id, CurrencyDto dto) {
         return currencyRepository.findById(id)
                 .flatMap(model -> updateFields(model, dto))
-                .then();
+                .map(currencyMapper::toDto);
     }
 
     @Override
