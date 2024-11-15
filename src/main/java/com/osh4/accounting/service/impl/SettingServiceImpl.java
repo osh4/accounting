@@ -11,6 +11,7 @@ import com.osh4.accounting.persistance.repository.SettingTypeRepository;
 import com.osh4.accounting.service.SettingService;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.Objects;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -60,12 +63,18 @@ public class SettingServiceImpl implements SettingService {
     }
 
     private Mono<SettingDto> populateSettingType(SettingDto dto) {
-        return settingTypeRepository.findById(dto.getSettingType().getId())
+        return Mono.justOrEmpty(dto.getSettingType())
+                .filter(Objects::nonNull)
+                .map(SettingTypeDto::getId)
+                .filter(StringUtils::isNotBlank)
+                .flatMap(settingTypeRepository::findById)
                 .map(settingTypeMapper::toDto)
                 .map(settingType -> {
                     dto.setSettingType(settingType);
                     return dto;
-                });
+                })
+                .switchIfEmpty(Mono.just(dto))
+                .onErrorReturn(dto);
     }
 
     @Override

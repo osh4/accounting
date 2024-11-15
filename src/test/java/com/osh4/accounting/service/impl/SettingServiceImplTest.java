@@ -1,7 +1,9 @@
 package com.osh4.accounting.service.impl;
 
 import com.osh4.accounting.converters.impl.SettingMapper;
+import com.osh4.accounting.converters.impl.SettingTypeMapper;
 import com.osh4.accounting.dto.SettingDto;
+import com.osh4.accounting.dto.SettingTypeDto;
 import com.osh4.accounting.persistance.r2dbc.Setting;
 import com.osh4.accounting.persistance.r2dbc.SettingType;
 import com.osh4.accounting.persistance.repository.SettingRepository;
@@ -40,6 +42,8 @@ class SettingServiceImplTest {
     @Mock
     private SettingType settingType;
     @Mock
+    private SettingTypeDto settingTypeDto;
+    @Mock
     private Setting oldSettings;
     @Mock
     private SettingDto settingDto;
@@ -53,6 +57,8 @@ class SettingServiceImplTest {
     @Mock
     private SettingTypeRepository settingTypeRepository;
     @Mock
+    private SettingTypeMapper settingTypeMapper;
+    @Mock
     private SettingMapper settingMapper;
     @InjectMocks
     private SettingServiceImpl service;
@@ -60,11 +66,13 @@ class SettingServiceImplTest {
     @Test
     public void shouldGetAndConvertAllSettings() {
         // given
-        when(settings.getSettingTypeId()).thenReturn(SETTING_TYPE_ID);
         when(settingRepository.findAllBy(pageRequest)).thenReturn(Flux.just(settings));
-        when(settingTypeRepository.findById(SETTING_TYPE_ID)).thenReturn(Mono.just(settingType));
         when(settingMapper.toDto(settings)).thenReturn(settingDto);
+        when(settingDto.getSettingType()).thenReturn(settingTypeDto);
+        when(settingTypeDto.getId()).thenReturn(SETTING_TYPE_ID);
         when(settingRepository.count()).thenReturn(Mono.just(RECORDS_COUNT));
+        when(settingTypeRepository.findById(SETTING_TYPE_ID)).thenReturn(Mono.just(settingType));
+        when(settingTypeMapper.toDto(settingType)).thenReturn(settingTypeDto);
 
         // when
         Page<SettingDto> result = service.getAll(pageRequest).block();
@@ -73,6 +81,7 @@ class SettingServiceImplTest {
         assertThat(result).isNotEmpty();
         assertThat(result.getContent()).hasSize(1)
                 .contains(settingDto);
+        assertThat(result.getContent().get(0).getSettingType()).isNotNull().isEqualTo(settingTypeDto);
     }
 
     @Test
