@@ -32,19 +32,19 @@ public class TransactionTypeController extends BaseController {
     }
 
     @PostMapping
-    public Mono<ResponseEntity<String>> create(@RequestBody TransactionTypeDto dto) {
+    public Mono<ResponseEntity<TransactionTypeDto>> create(@RequestBody TransactionTypeDto dto) {
         return transactionTypeService.create(dto)
-                .flatMap(s -> successResponseCreate())
+                .flatMap(this::successResponse)
                 .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponseCreate());
+                .onErrorReturn(failResponse());
     }
 
     @PutMapping("/{id}")
-    public Mono<ResponseEntity<String>> update(@PathVariable String id, @RequestBody TransactionTypeDto dto) {
+    public Mono<ResponseEntity<TransactionTypeDto>> update(@PathVariable String id, @RequestBody TransactionTypeDto dto) {
         return transactionTypeService.update(id, dto)
-                .flatMap(s -> successResponseUpdate())
+                .flatMap(this::successResponse)
                 .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponseUpdate());
+                .onErrorReturn(failResponse());
     }
 
     @DeleteMapping("/{id}")

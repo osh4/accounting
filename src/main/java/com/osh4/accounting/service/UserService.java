@@ -1,7 +1,6 @@
 package com.osh4.accounting.service;
 
 import com.osh4.accounting.dto.UserDto;
-import com.osh4.accounting.persistance.r2dbc.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import reactor.core.publisher.Mono;
@@ -15,9 +14,9 @@ public interface UserService {
 
     Mono<UserDto> get(String id);
 
-    Mono<User> create(UserDto dto);
+    Mono<UserDto> create(UserDto dto);
 
-    Mono<Void> update(String id, UserDto dto);
+    Mono<UserDto> update(String id, UserDto dto);
 
     Mono<Void> delete(String id);
 }

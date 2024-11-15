@@ -36,19 +36,19 @@ public class UserController extends BaseController {
     }
 
     @PostMapping
-    public Mono<ResponseEntity<String>> create(@RequestBody UserDto dto) {
+    public Mono<ResponseEntity<UserDto>> create(@RequestBody UserDto dto) {
         return userService.create(dto)
-                .flatMap(s -> successResponseCreate())
+                .flatMap(this::successResponse)
                 .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponseCreate());
+                .onErrorReturn(failResponse());
     }
 
     @PutMapping("/{id}")
-    public Mono<ResponseEntity<String>> update(@PathVariable String id, @RequestBody UserDto dto) {
+    public Mono<ResponseEntity<UserDto>> update(@PathVariable String id, @RequestBody UserDto dto) {
         return userService.update(id, dto)
-                .flatMap(s -> successResponseUpdate())
+                .flatMap(this::successResponse)
                 .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponseUpdate());
+                .onErrorReturn(failResponse());
     }
 
     @DeleteMapping("/{id}")

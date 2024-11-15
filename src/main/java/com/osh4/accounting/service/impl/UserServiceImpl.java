@@ -40,15 +40,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Mono<User> create(UserDto dto) {
-        return userRepository.save(userMapper.toModel(dto).setAsNew());
+    public Mono<UserDto> create(UserDto dto) {
+        return userRepository.save(userMapper.toModel(dto).setAsNew()).map(userMapper::toDto);
     }
 
     @Override
-    public Mono<Void> update(String id, UserDto dto) {
+    public Mono<UserDto> update(String id, UserDto dto) {
         return userRepository.findById(id)
                 .flatMap(model -> updateFields(model, dto))
-                .then();
+                .map(userMapper::toDto);
     }
 
     @Override

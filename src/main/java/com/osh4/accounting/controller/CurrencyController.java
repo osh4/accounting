@@ -41,11 +41,11 @@ public class CurrencyController extends BaseController {
     }
 
     @PostMapping
-    public Mono<ResponseEntity<String>> create(@RequestBody CurrencyDto dto) {
+    public Mono<ResponseEntity<CurrencyDto>> create(@RequestBody CurrencyDto dto) {
         return currencyService.create(dto)
-                .flatMap(s -> successResponseCreate())
+                .flatMap(this::successResponse)
                 .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponseCreate());
+                .onErrorReturn(failResponse());
     }
 
     @PutMapping("/{id}")

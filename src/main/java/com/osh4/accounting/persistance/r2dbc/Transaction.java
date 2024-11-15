@@ -26,13 +26,7 @@ public class Transaction implements Persistable<String> {
     private BigDecimal amount;
     private String description;
     private String transactionTypeId;
-    @Transient
-    private TransactionType transactionType;
-    @Transient
-    private Account sourceAccount;
     private String sourceAccountId;
-    @Transient
-    private Account targetAccount;
     private String targetAccountId;
     private String transactionCategoryId;
     @Transient

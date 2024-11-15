@@ -2,15 +2,17 @@ package com.osh4.accounting.service.impl;
 
 import com.osh4.accounting.converters.impl.AccountMapper;
 import com.osh4.accounting.dto.AccountDto;
+import com.osh4.accounting.dto.CurrencyDto;
 import com.osh4.accounting.dto.TransactionDto;
+import com.osh4.accounting.dto.UserDto;
 import com.osh4.accounting.persistance.r2dbc.Account;
 import com.osh4.accounting.persistance.repository.AccountRepository;
-import com.osh4.accounting.persistance.repository.CurrencyRepository;
-import com.osh4.accounting.persistance.repository.UserRepository;
 import com.osh4.accounting.service.AccountService;
+import com.osh4.accounting.service.CurrencyService;
+import com.osh4.accounting.service.UserService;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
-import org.reactivestreams.Publisher;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -28,35 +31,47 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @AllArgsConstructor
 public class AccountServiceImpl implements AccountService {
     private AccountRepository accountRepository;
-    private CurrencyRepository currencyRepository;
-    private UserRepository userRepository;
+    private CurrencyService currencyService;
+    private UserService userService;
     private AccountMapper accountMapper;
 
     @Override
     public Mono<Page<AccountDto>> getAll(PageRequest pageRequest) {
         return accountRepository.findAllBy(pageRequest)
-                .flatMap(this::populateCurrency)
-                .flatMap(this::populateUser)
                 .map(accountMapper::toDto)
+                .flatMap(this::populateUser)
+                .flatMap(this::populateCurrency)
                 .collectList()
                 .zipWith(accountRepository.count())
                 .map(t -> new PageImpl<>(t.getT1(), pageRequest, t.getT2()));
     }
 
-    private Publisher<? extends Account> populateUser(Account account) {
-        return userRepository.findById(account.getUserId())
+    private Mono<AccountDto> populateUser(AccountDto dto) {
+        return Mono.justOrEmpty(dto.getUser())
+                .filter(Objects::nonNull)
+                .map(UserDto::getId)
+                .filter(StringUtils::isNotBlank)
+                .flatMap(userService::get)
                 .map(user -> {
-                    account.setUser(user);
-                    return account;
-                });
+                    dto.setUser(user);
+                    return dto;
+                })
+                .switchIfEmpty(Mono.just(dto))
+                .onErrorReturn(dto);
     }
 
-    private Publisher<? extends Account> populateCurrency(Account account) {
-        return currencyRepository.findById(account.getCurrencyId())
-                .map(cur -> {
-                    account.setCurrency(cur);
-                    return account;
-                });
+    private Mono<AccountDto> populateCurrency(AccountDto dto) {
+        return Mono.justOrEmpty(dto.getCurrency())
+                .filter(Objects::nonNull)
+                .map(CurrencyDto::getId)
+                .filter(StringUtils::isNotBlank)
+                .flatMap(currencyService::get)
+                .map(currency -> {
+                    dto.setCurrency(currency);
+                    return dto;
+                })
+                .switchIfEmpty(Mono.just(dto))
+                .onErrorReturn(dto);
     }
 
     @Override
@@ -67,8 +82,8 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
-    public Mono<Account> create(AccountDto dto) {
-        return accountRepository.save(accountMapper.toModel(dto).setAsNew());
+    public Mono<AccountDto> create(AccountDto dto) {
+        return accountRepository.save(accountMapper.toModel(dto).setAsNew()).map(accountMapper::toDto);
     }
 
     @Override

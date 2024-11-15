@@ -36,24 +36,8 @@ public class BaseController {
         return this.getClass().getSimpleName().replace("Controller", StringUtils.EMPTY);
     }
 
-    protected Mono<ResponseEntity<String>> successResponseCreate() {
-        return successResponse(MSG_THE + SPACE + getEntityName() + SPACE + MSG_CREATE_SUCCESS);
-    }
-
-    protected Mono<ResponseEntity<String>> successResponseUpdate() {
-        return successResponse(MSG_THE + SPACE + getEntityName() + SPACE + MSG_UPDATE_SUCCESS);
-    }
-
     protected Mono<ResponseEntity<String>> successResponseDelete() {
         return successResponse(MSG_THE + SPACE + getEntityName() + SPACE + MSG_DELETE_SUCCESS);
-    }
-
-    protected ResponseEntity<String> failResponseCreate() {
-        return failResponse(MSG_CREATE_FAIL + SPACE + MSG_THE.toLowerCase() + SPACE + getEntityName());
-    }
-
-    protected ResponseEntity<String> failResponseUpdate() {
-        return failResponse(MSG_UPDATE_FAIL + SPACE + MSG_THE.toLowerCase() + SPACE + getEntityName());
     }
 
     protected ResponseEntity<String> failResponseDelete() {

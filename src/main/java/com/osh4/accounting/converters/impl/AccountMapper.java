@@ -9,6 +9,7 @@ import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * @author osh4 <konstantin@osh4.com>
@@ -20,7 +21,13 @@ public interface AccountMapper {
     @Mapping(target = "isNewEntity", ignore = true)
     @Mapping(source = "currency", target = "currencyId", qualifiedByName = "currencySaveMapper")
     @Mapping(source = "user", target = "userId", qualifiedByName = "userSaveMapper")
+    @Mapping(source = "id", target = "id", qualifiedByName = "accountIdSaveMapper")
     Account toModel(AccountDto dto);
+
+    @Named("accountIdSaveMapper")
+    static String accountIdSaveMapper(String id) {
+        return Optional.ofNullable(id).orElse(UUID.randomUUID().toString());
+    }
 
     @Named("currencySaveMapper")
     static String currencySaveMapper(CurrencyDto currencyDto) {

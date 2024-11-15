@@ -14,7 +14,7 @@ public interface CurrencyService {
 
     Mono<CurrencyDto> getByIsocode(String isocode);
 
-    Mono<Currency> create(CurrencyDto dto);
+    Mono<CurrencyDto> create(CurrencyDto dto);
 
     Mono<CurrencyDto> update(String id, CurrencyDto dto);
 

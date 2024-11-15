@@ -12,7 +12,7 @@ public interface AccountService {
 
     Mono<AccountDto> get(String id);
 
-    Mono<Account> create(AccountDto dto);
+    Mono<AccountDto> create(AccountDto dto);
 
     Mono<AccountDto> update(String id, AccountDto dto);
 

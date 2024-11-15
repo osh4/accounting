@@ -46,8 +46,8 @@ public class CurrencyServiceImpl implements CurrencyService {
     }
 
     @Override
-    public Mono<Currency> create(CurrencyDto dto) {
-        return currencyRepository.save(currencyMapper.toModel(dto).setAsNew());
+    public Mono<CurrencyDto> create(CurrencyDto dto) {
+        return currencyRepository.save(currencyMapper.toModel(dto).setAsNew()).map(currencyMapper::toDto);
     }
 
     @Override

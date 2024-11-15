@@ -36,16 +36,17 @@ public class TransactionTypeServiceImpl implements TransactionTypeService {
     }
 
     @Override
-    public Mono<TransactionType> create(TransactionTypeDto dto) {
-        return transactionTypeRepository.save(transactionTypeMapper.toModel(dto).setAsNew());
+    public Mono<TransactionTypeDto> create(TransactionTypeDto dto) {
+        return transactionTypeRepository.save(transactionTypeMapper.toModel(dto).setAsNew())
+                .map(transactionTypeMapper::toDto);
     }
 
 
     @Override
-    public Mono<Void> update(String id, TransactionTypeDto dto) {
+    public Mono<TransactionTypeDto> update(String id, TransactionTypeDto dto) {
         return transactionTypeRepository.findById(id)
                 .flatMap(model -> updateFields(model, dto))
-                .then();
+                .map(transactionTypeMapper::toDto);
     }
 
     @Override

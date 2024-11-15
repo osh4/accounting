@@ -17,11 +17,11 @@ public interface SettingMapper {
     @Mapping(source = "settingTypeId", target = "settingType", qualifiedByName = "settingTypeGetMapper")
     SettingDto toDto(Setting model);
 
-    @Mapping(source = "settingType", target = "settingTypeId", qualifiedByName = "settingSaveMapper")
+    @Mapping(source = "settingType", target = "settingTypeId", qualifiedByName = "settingTypeSaveMapper")
     Setting toModel(SettingDto dto);
 
-    @Named("settingSaveMapper")
-    static String settingSaveMapper(SettingTypeDto dto) {
+    @Named("settingTypeSaveMapper")
+    static String settingTypeSaveMapper(SettingTypeDto dto) {
         return Optional.ofNullable(dto).map(SettingTypeDto::getId).orElse(null);
     }
 

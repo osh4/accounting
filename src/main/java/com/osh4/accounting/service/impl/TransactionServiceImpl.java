@@ -1,14 +1,16 @@
 package com.osh4.accounting.service.impl;
 
 import com.osh4.accounting.converters.impl.TransactionMapper;
+import com.osh4.accounting.dto.AccountDto;
 import com.osh4.accounting.dto.TransactionCategoryDto;
 import com.osh4.accounting.dto.TransactionDto;
+import com.osh4.accounting.dto.TransactionTypeDto;
 import com.osh4.accounting.persistance.r2dbc.Transaction;
-import com.osh4.accounting.persistance.repository.AccountRepository;
 import com.osh4.accounting.persistance.repository.TransactionRepository;
-import com.osh4.accounting.persistance.repository.TransactionTypeRepository;
+import com.osh4.accounting.service.AccountService;
 import com.osh4.accounting.service.TransactionCategoryService;
 import com.osh4.accounting.service.TransactionService;
+import com.osh4.accounting.service.TransactionTypeService;
 import lombok.AllArgsConstructor;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -19,9 +21,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Objects;
 
 import static java.util.Objects.isNull;
@@ -35,18 +35,18 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @AllArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
     private TransactionRepository transactionRepository;
-    private TransactionTypeRepository transactionTypeRepository;
+    private TransactionTypeService transactionTypeService;
     private TransactionCategoryService transactionCategoryService;
-    private AccountRepository accountRepository;
+    private AccountService accountService;
     private TransactionMapper transactionMapper;
 
     @Override
     public Mono<Page<TransactionDto>> getAll(PageRequest pageRequest) {
         return transactionRepository.findAllBy(pageRequest)
-                .flatMap(this::populateTransactionType)
+                .map(transactionMapper::toDto)
                 .flatMap(this::populateSourceAccount)
                 .flatMap(this::populateTargetAccount)
-                .map(transactionMapper::toDto)
+                .flatMap(this::populateTransactionType)
                 .flatMap(this::populateTransactionCategory)
                 .collectList()
                 .zipWith(transactionRepository.count())
@@ -67,49 +67,57 @@ public class TransactionServiceImpl implements TransactionService {
                 .onErrorReturn(dto);
     }
 
-    private Mono<Transaction> populateTransactionType(Transaction transaction) {
-        return transactionTypeRepository.findById(transaction.getTransactionTypeId())
+    private Mono<TransactionDto> populateTransactionType(TransactionDto dto) {
+        return Mono.justOrEmpty(dto.getTransactionType())
+                .filter(Objects::nonNull)
+                .map(TransactionTypeDto::getId)
+                .filter(StringUtils::isNotBlank)
+                .flatMap(transactionTypeService::get)
                 .map(transactionType -> {
-                    transaction.setTransactionType(transactionType);
-                    return transaction;
-                });
+                    dto.setTransactionType(transactionType);
+                    return dto;
+                })
+                .switchIfEmpty(Mono.just(dto))
+                .onErrorReturn(dto);
     }
 
-    private Mono<Transaction> populateSourceAccount(Transaction transaction) {
-        return accountRepository.findById(transaction.getSourceAccountId())
+    private Mono<TransactionDto> populateSourceAccount(TransactionDto dto) {
+        return Mono.justOrEmpty(dto.getSourceAccount())
+                .filter(Objects::nonNull)
+                .map(AccountDto::getId)
+                .filter(StringUtils::isNotBlank)
+                .flatMap(accountService::get)
                 .map(account -> {
-                    transaction.setSourceAccount(account);
-                    return transaction;
-                });
+                    dto.setSourceAccount(account);
+                    return dto;
+                })
+                .switchIfEmpty(Mono.just(dto))
+                .onErrorReturn(dto);
     }
 
-    private Mono<Transaction> populateTargetAccount(Transaction transaction) {
-        return accountRepository.findById(transaction.getTargetAccountId())
+    private Mono<TransactionDto> populateTargetAccount(TransactionDto dto) {
+        return Mono.justOrEmpty(dto.getTargetAccount())
+                .filter(Objects::nonNull)
+                .map(AccountDto::getId)
+                .filter(StringUtils::isNotBlank)
+                .flatMap(accountService::get)
                 .map(account -> {
-                    transaction.setTargetAccount(account);
-                    return transaction;
-                });
+                    dto.setTargetAccount(account);
+                    return dto;
+                })
+                .switchIfEmpty(Mono.just(dto))
+                .onErrorReturn(dto);
     }
 
     @Override
     public Mono<TransactionDto> get(String id) {
         return transactionRepository.findById(id)
-                .flatMap(this::populateTransactionType)
+                .map(transactionMapper::toDto)
                 .flatMap(this::populateSourceAccount)
                 .flatMap(this::populateTargetAccount)
-                .map(transactionMapper::toDto)
+                .flatMap(this::populateTransactionType)
                 .flatMap(this::populateTransactionCategory)
                 .switchIfEmpty(Mono.error(new Exception()));
-    }
-
-    @Override
-    public Mono<List<TransactionDto>> get(LocalDate from, LocalDate to) {
-        return transactionRepository.findAllByTransactionDateBetween(from, to)
-                .flatMap(this::populateTransactionType)
-                .flatMap(this::populateSourceAccount)
-                .flatMap(this::populateTargetAccount)
-                .map(transactionMapper::toDto)
-                .collectList();
     }
 
     @Override
@@ -119,7 +127,8 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Mono<TransactionDto> create(TransactionDto dto) {
-        return transactionRepository.save(transactionMapper.toModel(dto).setAsNew()).map(transactionMapper::toDto);
+        return transactionRepository.save(transactionMapper.toModel(dto).setAsNew())
+                .map(transactionMapper::toDto);
     }
 
     @Override

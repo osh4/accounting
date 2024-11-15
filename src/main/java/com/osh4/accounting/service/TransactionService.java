@@ -20,8 +20,6 @@ public interface TransactionService {
 
     Mono<TransactionDto> get(String id);
 
-    Mono<List<TransactionDto>> get(LocalDate from, LocalDate to);
-
     Mono<BigDecimal> getAmountForDatePeriod(LocalDateTime from, LocalDateTime to);
 
     Mono<TransactionDto> create(TransactionDto dto);
