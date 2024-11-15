@@ -28,7 +28,6 @@ public class TransactionTypeServiceImpl implements TransactionTypeService {
         return transactionTypeRepository.findAll().map(transactionTypeMapper::toDto);
     }
 
-
     @Override
     public Mono<TransactionTypeDto> get(String id) {
         return transactionTypeRepository.findById(id)

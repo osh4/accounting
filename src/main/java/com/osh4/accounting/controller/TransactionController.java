@@ -31,6 +31,14 @@ public class TransactionController extends BaseController {
                 .doOnError(error -> log.error(error.getMessage(), error))
                 .onErrorReturn(failResponse());
     }
+//
+//    @PostMapping
+//    public Mono<ResponseEntity<String>> create(@RequestBody TransactionDto dto) {
+//        return transactionService.create(dto)
+//                .flatMap(s -> successResponseCreate())
+//                .doOnError(error -> log.error(error.getMessage(), error))
+//                .onErrorReturn(failResponseCreate());
+//    }
 
     @PostMapping
     public Mono<ResponseEntity<String>> create(@RequestBody TransactionDto dto) {

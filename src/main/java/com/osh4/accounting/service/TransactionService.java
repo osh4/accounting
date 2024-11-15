@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import reactor.core.publisher.Mono;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -22,7 +23,9 @@ public interface TransactionService {
 
     Mono<Transaction> create(TransactionDto dto);
 
-    Mono<Void> update(String id, TransactionDto dto);
+    Mono<TransactionDto> create(TransactionDto dto);
+
+    Mono<TransactionDto> update(String id, TransactionDto dto);
 
     Mono<Void> delete(String id);
 

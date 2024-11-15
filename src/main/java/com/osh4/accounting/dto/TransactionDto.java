@@ -20,4 +20,5 @@ public class TransactionDto {
     private TransactionTypeDto transactionType;
     private AccountDto sourceAccount;
     private AccountDto targetAccount;
+    private TransactionCategoryDto transactionCategory;
 }
