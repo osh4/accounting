@@ -1,6 +1,7 @@
 package com.osh4.accounting.service;
 
 import com.osh4.accounting.dto.AccountDto;
+import com.osh4.accounting.dto.TransactionDto;
 import com.osh4.accounting.persistance.r2dbc.Account;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -13,7 +14,9 @@ public interface AccountService {
 
     Mono<Account> create(AccountDto dto);
 
-    Mono<Void> update(String id,AccountDto dto);
+    Mono<AccountDto> update(String id, AccountDto dto);
 
     Mono<Void> delete(String id);
+
+    Mono<TransactionDto> recalculateAccountAmount(TransactionDto dto);
 }

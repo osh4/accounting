@@ -8,6 +8,7 @@ import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -21,7 +22,7 @@ public interface TransactionService {
 
     Mono<List<TransactionDto>> get(LocalDate from, LocalDate to);
 
-    Mono<Transaction> create(TransactionDto dto);
+    Mono<BigDecimal> getAmountForDatePeriod(LocalDateTime from, LocalDateTime to);
 
     Mono<TransactionDto> create(TransactionDto dto);
 

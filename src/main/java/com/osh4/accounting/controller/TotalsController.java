@@ -22,9 +22,20 @@ public class TotalsController extends BaseController {
     private final TotalsService totalsService;
 
     @GetMapping
-    public Mono<ResponseEntity<String>> get(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate from,
-                                            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate to) {
-        return totalsService.calculateTotals(from, to)
+    public Mono<ResponseEntity<String>> getByPeriod(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+                                                    LocalDate from,
+                                                    @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+                                                    LocalDate to) {
+        return totalsService.calculateTotalsForPeriod(from, to)
+                .flatMap(this::successResponse)
+                .doOnError(error -> log.error(error.getMessage(), error))
+                .onErrorReturn(failResponse());
+    }
+
+    @GetMapping("/day")
+    public Mono<ResponseEntity<String>> getByDay(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+                                                 LocalDate day) {
+        return totalsService.calculateTotalsForDay(day)
                 .flatMap(this::successResponse)
                 .doOnError(error -> log.error(error.getMessage(), error))
                 .onErrorReturn(failResponse());

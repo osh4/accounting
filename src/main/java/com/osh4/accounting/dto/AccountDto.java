@@ -3,6 +3,8 @@ package com.osh4.accounting.dto;
 import lombok.Data;
 import lombok.experimental.Accessors;
 
+import java.math.BigDecimal;
+
 @Data
 @Accessors(chain = true)
 public class AccountDto {
@@ -11,4 +13,5 @@ public class AccountDto {
     private String description;
     private CurrencyDto currency;
     private UserDto user;
+    private BigDecimal amount;
 }

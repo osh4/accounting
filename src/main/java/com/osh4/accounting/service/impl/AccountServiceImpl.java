@@ -2,6 +2,7 @@ package com.osh4.accounting.service.impl;
 
 import com.osh4.accounting.converters.impl.AccountMapper;
 import com.osh4.accounting.dto.AccountDto;
+import com.osh4.accounting.dto.TransactionDto;
 import com.osh4.accounting.persistance.r2dbc.Account;
 import com.osh4.accounting.persistance.repository.AccountRepository;
 import com.osh4.accounting.persistance.repository.CurrencyRepository;
@@ -16,6 +17,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Mono;
+
+import java.math.BigDecimal;
 
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
@@ -70,15 +73,32 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     @Transactional
-    public Mono<Void> update(String id, AccountDto dto) {
+    public Mono<AccountDto> update(String id, AccountDto dto) {
         return accountRepository.findById(id)
                 .flatMap(model -> updateFields(model, dto))
-                .then();
+                .map(accountMapper::toDto);
     }
 
     @Override
     public Mono<Void> delete(String id) {
         return accountRepository.deleteById(id);
+    }
+
+    @Override
+    public Mono<TransactionDto> recalculateAccountAmount(TransactionDto dto) {
+        AccountDto sourceAccount = dto.getSourceAccount();
+        AccountDto targetAccount = dto.getTargetAccount();
+        BigDecimal amount = dto.getAmount();
+        synchronized (this) {
+            sourceAccount.setAmount(sourceAccount.getAmount().add(amount.negate()));
+            targetAccount.setAmount(sourceAccount.getAmount().add(amount));
+            AccountDto newSourceAccount = this.update(sourceAccount.getId(), sourceAccount).block();
+            AccountDto newTargetAccount = this.update(targetAccount.getId(), targetAccount).block();
+            dto.setSourceAccount(newSourceAccount);
+            dto.setTargetAccount(newTargetAccount);
+        }
+
+        return Mono.just(dto);
     }
 
     private Mono<Account> updateFields(Account model, AccountDto dto) {

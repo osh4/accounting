@@ -20,6 +20,7 @@ import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
@@ -112,8 +113,8 @@ public class TransactionServiceImpl implements TransactionService {
     }
 
     @Override
-    public Mono<Transaction> create(TransactionDto dto) {
-        return transactionRepository.save(transactionMapper.toModel(dto).setAsNew());
+    public Mono<BigDecimal> getAmountForDatePeriod(LocalDateTime from, LocalDateTime to) {
+        return transactionRepository.findByTransactionDateBetween(from, to);
     }
 
     @Override
