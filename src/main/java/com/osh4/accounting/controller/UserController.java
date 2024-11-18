@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -13,34 +15,18 @@ import reactor.core.publisher.Mono;
  * @author osh4 <konstantin@osh4.com>
  */
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/users")
 @Slf4j
 @AllArgsConstructor
 public class UserController extends BaseController {
 
     private final UserService userService;
 
-    @GetMapping
+    @GetMapping("/all")
     public Mono<Page<UserDto>> getAll(@RequestParam(defaultValue = "0") int page,
                                       @RequestParam(defaultValue = "10") int size,
                                       @RequestParam(defaultValue = "id_asc") String sort) {
         return userService.getAll(paginatedSearchService.paginationInfo(page, size, sort));
-    }
-
-    @GetMapping("/{id}")
-    public Mono<ResponseEntity<UserDto>> get(@PathVariable String id) {
-        return userService.get(id)
-                .flatMap(this::successResponse)
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponse());
-    }
-
-    @PostMapping
-    public Mono<ResponseEntity<UserDto>> create(@RequestBody UserDto dto) {
-        return userService.create(dto)
-                .flatMap(this::successResponse)
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponse());
     }
 
     @PutMapping("/{id}")

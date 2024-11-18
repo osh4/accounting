@@ -81,8 +81,9 @@ CREATE TABLE users
     name          varchar(200),
     password      varchar(200),
     roles         varchar(64)[],
-    created_date  date,
-    modified_date date
+    enabled       bool,
+    created_date  timestamp,
+    modified_date timestamp
 );
 
 DROP TABLE IF EXISTS transactions_categories;

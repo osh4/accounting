@@ -6,13 +6,19 @@ import com.osh4.accounting.persistance.r2dbc.User;
 import com.osh4.accounting.persistance.repository.UserRepository;
 import com.osh4.accounting.service.UserService;
 import lombok.AllArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.*;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
+
+import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -22,6 +28,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
     private UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public Mono<Page<UserDto>> getAll(PageRequest pageRequest) {
@@ -41,7 +48,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Mono<UserDto> create(UserDto dto) {
-        return userRepository.save(userMapper.toModel(dto).setAsNew()).map(userMapper::toDto);
+        return Mono.just(dto)
+                .map(userMapper::toModel)
+                .map(User::setAsNew)
+                .map(this::encodePassword)
+                .flatMap(userRepository::save)
+                .map(userMapper::toDto);
+    }
+
+    private User encodePassword(User u) {
+        u.setPassword(passwordEncoder.encode(u.getPassword()));
+        return u;
     }
 
     @Override
@@ -66,6 +83,23 @@ public class UserServiceImpl implements UserService {
         if (isNotBlank(dto.getEmail()) && ObjectUtils.notEqual(model.getEmail(), dto.getEmail())) {
             model.setEmail(dto.getEmail());
         }
+        if (isNotBlank(dto.getPassword()) && !passwordEncoder.matches(dto.getPassword(), model.getPassword())) {
+            model.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
+        if (ObjectUtils.notEqual(model.isEnabled(), dto.isEnabled())) {
+            model.setEnabled(dto.isEnabled());
+        }
+        if (CollectionUtils.isNotEmpty(dto.getRoles()) && ObjectUtils.notEqual(model.getRoles(), dto.getRoles())) {
+            model.setRoles(dto.getRoles().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet()));
+        }
         return userRepository.save(model);
+    }
+
+    @Override
+    public Mono<UserDetails> findByUsername(String username) {
+        return userRepository.findByEmail(username)
+                .map(userMapper::toDto)
+                .map(UserDetails.class::cast)
+                .switchIfEmpty(Mono.error(new Exception()));
     }
 }

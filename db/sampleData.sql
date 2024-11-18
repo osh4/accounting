@@ -37,9 +37,10 @@ VALUES ('1', '840', 'USD', 'United States Dollar'),
        ('3', '643', 'RUB', 'Russian Rubles'),
        ('4', '978', 'EUR', 'Euro');
 
-INSERT INTO users(id, email, name, password, roles, created_date, modified_date)
-VALUES ('1', 'test@test.com', 'Test Test', '123', '{"ADMIN","USER"}', NOW(), NOW())
-;
+-- Passwords: user - 123, admin - nimda
+INSERT INTO users(id, email, name, password, roles, created_date, modified_date, enabled)
+VALUES ('1', 'user@test.com', 'Test User', '{bcrypt}$2a$10$cNI1L04yzK5VbGpd4IvszekDGwwb9NOZ7b/hz6JxYgjXUgdX16Tx6', '{"USER"}', NOW(), NOW(), true),
+       ('2', 'admin@test.com', 'Test Admin', '{bcrypt}$2a$10$d9L0E0mCNDcILQ6b/3gAfuEJvFypXM9Jm7ocF632QHMdlJ8XT0Tqq', '{"ADMIN"}', NOW(), NOW(), true);
 
 INSERT INTO accounts(id, name, description, currency_id, user_id, amount)
 VALUES ('1', 'Cash AMD', '', '2', '1', '1000'),

@@ -27,12 +27,13 @@ public class User implements Persistable<String> {
     private String email;
     private String name;
     private String password;
+    private boolean enabled;
     private Set<String> roles;
-//    @CreatedDate
-//    private LocalDateTime createdDate;
-//
-//    @LastModifiedDate
-//    private LocalDateTime lastModifiedDate;
+    @CreatedDate
+    private LocalDateTime createdDate;
+    @LastModifiedDate
+    private LocalDateTime modifiedDate;
+
     @Transient
     private boolean isNewEntity;
 
