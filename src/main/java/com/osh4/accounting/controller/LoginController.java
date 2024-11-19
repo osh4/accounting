@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+import java.util.Objects;
+
 /**
  * @author osh4 <konstantin@osh4.com>
  */
@@ -33,6 +35,7 @@ public class LoginController extends BaseController {
         return Mono.justOrEmpty(user)// TODO: validation of user/password on emptiness
                 .map(UserCredentialsDto::getEmail)
                 .flatMap(userService::findByUsername)
+                .filter(Objects::nonNull)
                 .filter(dbUser -> passwordEncoder.matches(user.getPassword(), dbUser.getPassword()))
                 .map(jwtTokenAuthenticatorService::createJwt)
                 .map(LoginController::buildAuthCookie)

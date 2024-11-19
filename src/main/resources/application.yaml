@@ -1,5 +1,5 @@
 server:
-  port: 8443
+  port: ${API_PORT:8443}
   ssl:
     key-store: ${SSL_KEY_STORE:classpath:keystore.p12}
     key-store-password: ${SSL_KEY_STORE_PASSWORD:password}
@@ -19,4 +19,9 @@ spring:
       max-size: ${R2DBC_POOL_MAX_SIZE:10}
 app:
   cors:
-    allowedOrigins: ${APP_CORS_ALLOWED_ORIGINS:"http://localhost:4200"}
+    allowedOrigins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:4200}
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus

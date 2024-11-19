@@ -6,6 +6,7 @@ import com.osh4.accounting.persistance.r2dbc.User;
 import com.osh4.accounting.persistance.repository.UserRepository;
 import com.osh4.accounting.service.UserService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.data.domain.Page;
@@ -24,6 +25,7 @@ import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @Service
+@Slf4j
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
@@ -98,8 +100,11 @@ public class UserServiceImpl implements UserService {
     @Override
     public Mono<UserDetails> findByUsername(String username) {
         return userRepository.findByEmail(username)
+                .doOnError(error -> log.error(error.getMessage(), error))
+                .onErrorResume(it -> Mono.empty())
                 .map(userMapper::toDto)
                 .map(UserDetails.class::cast)
-                .switchIfEmpty(Mono.error(new Exception()));
+                .switchIfEmpty(Mono.empty())
+                .doOnTerminate(() -> log.warn("User for id {} not found", username));
     }
 }

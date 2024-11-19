@@ -35,6 +35,8 @@ public class WebFluxSecurityConfig {
                 .permitAll()
                 .pathMatchers("/users/login")
                 .permitAll()
+                .pathMatchers("/actuator/**")
+                .permitAll()
                 .pathMatchers(HttpMethod.GET, "/users/all").hasAuthority("ADMIN")
                 .pathMatchers(HttpMethod.PUT, "/users/*").hasAuthority("ADMIN")
                 .pathMatchers(HttpMethod.DELETE, "/users/*").hasAuthority("ADMIN")

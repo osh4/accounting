@@ -25,6 +25,7 @@ public class JwtAuthenticationManager implements ReactiveAuthenticationManager {
                 .map(String.class::cast)
                 .map(jwtTokenAuthenticatorService::validateJwt)
                 .onErrorResume(it -> Mono.empty())
+                .filter(Objects::nonNull)
                 .map(jws -> new UsernamePasswordAuthenticationToken(
                         jws.getPayload().getSubject(),
                         authentication.getCredentials(),
