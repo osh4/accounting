@@ -31,29 +31,21 @@ public class TransactionController extends BaseController {
                 .doOnError(error -> log.error(error.getMessage(), error))
                 .onErrorReturn(failResponse());
     }
-//
-//    @PostMapping
-//    public Mono<ResponseEntity<String>> create(@RequestBody TransactionDto dto) {
-//        return transactionService.create(dto)
-//                .flatMap(s -> successResponseCreate())
-//                .doOnError(error -> log.error(error.getMessage(), error))
-//                .onErrorReturn(failResponseCreate());
-//    }
 
     @PostMapping
-    public Mono<ResponseEntity<String>> create(@RequestBody TransactionDto dto) {
+    public Mono<ResponseEntity<TransactionDto>> create(@RequestBody TransactionDto dto) {
         return transactionService.create(dto)
-                .flatMap(s -> successResponseCreate())
+                .flatMap(this::successResponse)
                 .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponseCreate());
+                .onErrorReturn(failResponse());
     }
 
     @PutMapping("/{id}")
-    public Mono<ResponseEntity<String>> update(@PathVariable String id, @RequestBody TransactionDto dto) {
+    public Mono<ResponseEntity<TransactionDto>> update(@PathVariable String id, @RequestBody TransactionDto dto) {
         return transactionService.update(id, dto)
-                .flatMap(s -> successResponseUpdate())
+                .flatMap(this::successResponse)
                 .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponseUpdate());
+                .onErrorReturn(failResponse());
     }
 
     @DeleteMapping("/{id}")
