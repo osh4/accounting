@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+import javax.validation.Valid;
 import java.util.Objects;
 
 /**
@@ -31,8 +32,8 @@ public class LoginController extends BaseController {
     private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/login")
-    public Mono<ResponseEntity<Void>> login(@RequestBody UserCredentialsDto user) {
-        return Mono.justOrEmpty(user)// TODO: validation of user/password on emptiness
+    public Mono<ResponseEntity<Void>> login(@Valid @RequestBody UserCredentialsDto user) {
+        return Mono.justOrEmpty(user)
                 .map(UserCredentialsDto::getEmail)
                 .flatMap(userService::findByUsername)
                 .filter(Objects::nonNull)
@@ -59,8 +60,8 @@ public class LoginController extends BaseController {
     }
 
     @PostMapping("/signup")
-    public Mono<ResponseEntity<UserDto>> signup(@RequestBody UserDto dto) {
-        return userService.create(dto)
+    public Mono<ResponseEntity<UserDto>> signup(@Valid @RequestBody UserCredentialsDto dto) {
+        return userService.signUp(dto)
                 .flatMap(this::successResponse)
                 .doOnError(error -> log.error(error.getMessage(), error))
                 .onErrorReturn(failResponse());

@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
+import javax.validation.constraints.NotBlank;
+
 /**
  * @author osh4 <konstantin@osh4.com>
  */
@@ -15,6 +17,8 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserCredentialsDto {
+    @NotBlank
     private String email;
+    @NotBlank
     private String password;
 }

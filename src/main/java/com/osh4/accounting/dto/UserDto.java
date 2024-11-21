@@ -7,9 +7,12 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.validation.constraints.NotBlank;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Set;
+
+import static java.util.Objects.isNull;
 
 @Data
 @NoArgsConstructor
@@ -17,10 +20,12 @@ import java.util.Set;
 @Builder(toBuilder = true)
 public class UserDto implements UserDetails {
     private String id;
+    @NotBlank
     private String email;
     private String name;
+    @NotBlank
     private String password;
-    private boolean enabled;
+    private Boolean enabled;
     private Set<GrantedAuthority> roles;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
@@ -57,6 +62,6 @@ public class UserDto implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return enabled;
+        return isNull(enabled) || enabled;
     }
 }

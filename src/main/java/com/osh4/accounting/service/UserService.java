@@ -1,5 +1,6 @@
 package com.osh4.accounting.service;
 
+import com.osh4.accounting.dto.UserCredentialsDto;
 import com.osh4.accounting.dto.UserDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -16,6 +17,8 @@ public interface UserService extends ReactiveUserDetailsService {
     Mono<UserDto> get(String id);
 
     Mono<UserDto> create(UserDto dto);
+
+    Mono<UserDto> signUp(UserCredentialsDto dto);
 
     Mono<UserDto> update(String id, UserDto dto);
 

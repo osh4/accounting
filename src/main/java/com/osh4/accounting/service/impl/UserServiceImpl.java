@@ -1,7 +1,11 @@
 package com.osh4.accounting.service.impl;
 
 import com.osh4.accounting.converters.impl.UserMapper;
+import com.osh4.accounting.converters.impl.UserSignUpMapper;
+import com.osh4.accounting.dto.UserCredentialsDto;
 import com.osh4.accounting.dto.UserDto;
+import com.osh4.accounting.exception.AlreadyExistsException;
+import com.osh4.accounting.exception.NotFoundException;
 import com.osh4.accounting.persistance.r2dbc.User;
 import com.osh4.accounting.persistance.repository.UserRepository;
 import com.osh4.accounting.service.UserService;
@@ -30,6 +34,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class UserServiceImpl implements UserService {
     private UserRepository userRepository;
     private UserMapper userMapper;
+    private UserSignUpMapper signUpMapper;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -45,17 +50,25 @@ public class UserServiceImpl implements UserService {
     public Mono<UserDto> get(String id) {
         return userRepository.findById(id)
                 .map(userMapper::toDto)
-                .switchIfEmpty(Mono.error(new Exception()));
+                .switchIfEmpty(Mono.error(NotFoundException.fromUserEmail(id)));
     }
 
     @Override
     public Mono<UserDto> create(UserDto dto) {
-        return Mono.just(dto)
-                .map(userMapper::toModel)
-                .map(User::setAsNew)
-                .map(this::encodePassword)
-                .flatMap(userRepository::save)
-                .map(userMapper::toDto);
+        return userRepository.findByEmail(dto.getEmail())
+                .switchIfEmpty(Mono.just(userMapper.toModel(dto).setAsNew()).map(this::encodePassword).flatMap(userRepository::save))
+                .filter(User::isNewEntity)
+                .map(userMapper::toDto)
+                .switchIfEmpty(Mono.error(AlreadyExistsException.fromUserEmail(dto.getEmail())));
+    }
+
+    @Override
+    public Mono<UserDto> signUp(UserCredentialsDto dto) {
+        return userRepository.findByEmail(dto.getEmail())
+                .switchIfEmpty(Mono.just(signUpMapper.toModel(dto).setAsNew()).map(this::encodePassword).flatMap(userRepository::save))
+                .filter(User::isNewEntity)
+                .map(userMapper::toDto)
+                .switchIfEmpty(Mono.error(AlreadyExistsException.fromUserEmail(dto.getEmail())));
     }
 
     private User encodePassword(User u) {
@@ -64,20 +77,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Mono<UserDto> update(String id, UserDto dto) {
-        return userRepository.findById(id)
+    public Mono<UserDto> update(String email, UserDto dto) {
+        return userRepository.findByEmail(email)
+                .switchIfEmpty(Mono.error(NotFoundException.fromUserEmail(email)))
                 .flatMap(model -> updateFields(model, dto))
                 .map(userMapper::toDto);
     }
 
     @Override
-    public Mono<Void> delete(String id) {
-        return userRepository.deleteById(id);
+    public Mono<Void> delete(String email) {
+        return userRepository.findByEmail(email)
+                .switchIfEmpty(Mono.error(NotFoundException.fromUserEmail(email)))
+                .flatMap(user -> userRepository.deleteById(user.getId()));
     }
 
     private Mono<User> updateFields(User model, UserDto dto) {
-        if (isNull(dto)) {
-            return Mono.just(model);
+        if (isNull(dto) || isNull(model)) {
+            return Mono.justOrEmpty(model);
         }
         if (isNotBlank(dto.getName()) && ObjectUtils.notEqual(model.getName(), dto.getName())) {
             model.setName(dto.getName());
@@ -100,11 +116,9 @@ public class UserServiceImpl implements UserService {
     @Override
     public Mono<UserDetails> findByUsername(String username) {
         return userRepository.findByEmail(username)
+                .switchIfEmpty(Mono.error(NotFoundException.fromUserEmail(username)))
                 .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorResume(it -> Mono.empty())
                 .map(userMapper::toDto)
-                .map(UserDetails.class::cast)
-                .switchIfEmpty(Mono.empty())
-                .doOnTerminate(() -> log.warn("User for id {} not found", username));
+                .map(UserDetails.class::cast);
     }
 }

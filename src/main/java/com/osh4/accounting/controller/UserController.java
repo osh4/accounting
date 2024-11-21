@@ -6,8 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.factory.PasswordEncoderFactories;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -29,17 +27,17 @@ public class UserController extends BaseController {
         return userService.getAll(paginatedSearchService.paginationInfo(page, size, sort));
     }
 
-    @PutMapping("/{id}")
-    public Mono<ResponseEntity<UserDto>> update(@PathVariable String id, @RequestBody UserDto dto) {
-        return userService.update(id, dto)
+    @PutMapping("/{email}")
+    public Mono<ResponseEntity<UserDto>> update(@PathVariable String email, @RequestBody UserDto dto) {
+        return userService.update(email, dto)
                 .flatMap(this::successResponse)
                 .doOnError(error -> log.error(error.getMessage(), error))
                 .onErrorReturn(failResponse());
     }
 
-    @DeleteMapping("/{id}")
-    public Mono<ResponseEntity<String>> delete(@PathVariable String id) {
-        return userService.delete(id)
+    @DeleteMapping("/{email}")
+    public Mono<ResponseEntity<String>> delete(@PathVariable String email) {
+        return userService.delete(email)
                 .flatMap(s -> successResponseDelete())
                 .doOnError(error -> log.error(error.getMessage(), error))
                 .onErrorReturn(failResponseDelete());
