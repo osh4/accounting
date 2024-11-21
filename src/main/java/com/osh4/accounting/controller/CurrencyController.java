@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
+import javax.validation.Valid;
+
 @RestController
 @RequestMapping("/currencies")
 @Slf4j
@@ -41,24 +43,24 @@ public class CurrencyController extends BaseController {
     }
 
     @PostMapping
-    public Mono<ResponseEntity<CurrencyDto>> create(@RequestBody CurrencyDto dto) {
+    public Mono<ResponseEntity<CurrencyDto>> create(@Valid @RequestBody CurrencyDto dto) {
         return currencyService.create(dto)
                 .flatMap(this::successResponse)
                 .doOnError(error -> log.error(error.getMessage(), error))
                 .onErrorReturn(failResponse());
     }
 
-    @PutMapping("/{id}")
-    public Mono<ResponseEntity<CurrencyDto>> update(@PathVariable String id, @RequestBody CurrencyDto dto) {
-        return currencyService.update(id, dto)
+    @PutMapping("/{isoCode}")
+    public Mono<ResponseEntity<CurrencyDto>> update(@PathVariable String isoCode, @RequestBody CurrencyDto dto) {
+        return currencyService.update(isoCode, dto)
                 .flatMap(this::successResponse)
                 .doOnError(error -> log.error(error.getMessage(), error))
                 .onErrorReturn(failResponse());
     }
 
-    @DeleteMapping("/{id}")
-    public Mono<ResponseEntity<String>> delete(@PathVariable String id) {
-        return currencyService.delete(id)
+    @DeleteMapping("/{isoCode}")
+    public Mono<ResponseEntity<String>> delete(@PathVariable String isoCode) {
+        return currencyService.delete(isoCode)
                 .flatMap(s -> successResponseDelete())
                 .doOnError(error -> log.error(error.getMessage(), error))
                 .onErrorReturn(failResponseDelete());

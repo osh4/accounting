@@ -1,9 +1,8 @@
 package com.osh4.accounting.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import javax.validation.constraints.NotBlank;
 
 @Data
 @NoArgsConstructor
@@ -11,7 +10,9 @@ import lombok.NoArgsConstructor;
 @Builder(toBuilder = true)
 public class CurrencyDto {
     private String id;
+    @NotBlank
     private String isoCode;
+    @NotBlank
     private String name;
     private String longName;
 }
