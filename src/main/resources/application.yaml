@@ -21,7 +21,19 @@ app:
   cors:
     allowedOrigins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:4200}
 management:
+  health:
+    livenessstate:
+      enabled: true
+    readinessstate:
+      enabled: true
   endpoints:
     web:
       exposure:
         include: health,metrics,prometheus
+    jmx:
+      exposure:
+        include: health,metrics
+  endpoint:
+    health:
+      enabled: true
+      show-details: always
