@@ -13,7 +13,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/setting/type")
+@RequestMapping("/settings/types")
 @Slf4j
 @AllArgsConstructor
 public class SettingTypeController extends BaseController {

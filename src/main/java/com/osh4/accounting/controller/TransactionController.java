@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/transaction")
+@RequestMapping("/transactions")
 @Slf4j
 @AllArgsConstructor
 public class TransactionController extends BaseController {

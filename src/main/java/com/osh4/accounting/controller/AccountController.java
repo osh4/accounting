@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/account")
+@RequestMapping("/accounts")
 @Slf4j
 @AllArgsConstructor
 public class AccountController extends BaseController {

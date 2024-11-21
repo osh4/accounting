@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 import javax.validation.Valid;
 
 @RestController
-@RequestMapping("/setting")
+@RequestMapping("/settings")
 @Slf4j
 @AllArgsConstructor
 public class SettingController extends BaseController {

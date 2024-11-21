@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 @RestController
-@RequestMapping("/currency")
+@RequestMapping("/currencies")
 @Slf4j
 @AllArgsConstructor
 public class CurrencyController extends BaseController {
