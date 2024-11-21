@@ -13,6 +13,7 @@ import org.springframework.data.relational.core.mapping.Table;
 
 import java.time.LocalDateTime;
 import java.util.Set;
+import java.util.UUID;
 
 import static java.util.Objects.isNull;
 
@@ -23,7 +24,8 @@ import static java.util.Objects.isNull;
 @Builder(toBuilder = true)
 public class User implements Persistable<String> {
     @Id
-    private String id;
+    @Builder.Default
+    private String id = UUID.randomUUID().toString();
     private String email;
     private String name;
     private String password;
