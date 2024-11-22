@@ -62,8 +62,6 @@ public class LoginController extends BaseController {
     @PostMapping("/signup")
     public Mono<ResponseEntity<UserDto>> signup(@Valid @RequestBody UserCredentialsDto dto) {
         return userService.signUp(dto)
-                .flatMap(this::successResponse)
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponse());
+                .flatMap(this::successResponse);
     }
 }

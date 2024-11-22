@@ -14,6 +14,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
+
 /**
  * @author osh4 <konstantin@osh4.com>
  */
@@ -22,6 +24,7 @@ public interface UserMapper {
     @Mapping(source = "roles", target = "roles", qualifiedByName = "rolesGetMapper")
     UserDto toDto(User model);
 
+    @Mapping(target = "isNewEntity", ignore = true)
     @Mapping(source = "id", target = "id", qualifiedByName = "userIdSaveMapper")
     @Mapping(source = "roles", target = "roles", qualifiedByName = "rolesSaveMapper")
     User toModel(UserDto dto);
@@ -33,11 +36,17 @@ public interface UserMapper {
 
     @Named("rolesGetMapper")
     static Set<GrantedAuthority> rolesGetMapper(Set<String> roles) {
+        if (isNull(roles)) {
+            return null;
+        }
         return roles.stream().map(SimpleGrantedAuthority::new).collect(Collectors.toSet());
     }
 
     @Named("rolesSaveMapper")
     static Set<String> rolesSaveMapper(Set<GrantedAuthority> authorities) {
+        if (isNull(authorities)) {
+            return null;
+        }
         return authorities.stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet());
     }
 }

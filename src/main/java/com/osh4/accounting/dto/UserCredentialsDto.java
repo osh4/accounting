@@ -12,10 +12,9 @@ import javax.validation.constraints.NotBlank;
  * @author osh4 <konstantin@osh4.com>
  */
 @Data
-@Builder
-@Accessors(chain = true)
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder(toBuilder = true)
 public class UserCredentialsDto {
     @NotBlank
     private String email;
