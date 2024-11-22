@@ -20,6 +20,7 @@ public interface TransactionMapper {
     @Mapping(source = "targetAccountId", target = "targetAccount", qualifiedByName = "targetAccountGetMapper")
     TransactionDto toDto(Transaction model);
 
+    @Mapping(target = "isNewEntity", ignore = true)
     @Mapping(source = "transactionType", target = "transactionTypeId", qualifiedByName = "transactionTypeSaveMapper")
     @Mapping(source = "transactionCategory", target = "transactionCategoryId", qualifiedByName = "transactionCategorySaveMapper")
     @Mapping(source = "sourceAccount", target = "sourceAccountId", qualifiedByName = "accountSaveMapper")

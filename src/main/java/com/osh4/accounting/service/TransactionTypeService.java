@@ -1,14 +1,15 @@
 package com.osh4.accounting.service;
 
 import com.osh4.accounting.dto.TransactionTypeDto;
-import reactor.core.publisher.Flux;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import reactor.core.publisher.Mono;
 
 /**
  * @author osh4 <konstantin@osh4.com>
  */
 public interface TransactionTypeService {
-    Flux<TransactionTypeDto> getAll();
+    Mono<Page<TransactionTypeDto>> getAll(PageRequest pageRequest);
 
     Mono<TransactionTypeDto> get(String id);
 

@@ -16,6 +16,7 @@ import java.util.UUID;
 public interface TransactionTypeMapper {
     TransactionTypeDto toDto(TransactionType model);
 
+    @Mapping(target = "isNewEntity", ignore = true)
     @Mapping(source = "id", target = "id", qualifiedByName = "transactionTypeIdSaveMapper")
     TransactionType toModel(TransactionTypeDto dto);
 

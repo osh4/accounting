@@ -29,32 +29,24 @@ public class SettingController extends BaseController {
     @GetMapping("/{id}")
     public Mono<ResponseEntity<SettingDto>> get(@PathVariable String id) {
         return settingService.get(id)
-                .flatMap(this::successResponse)
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponse());
+                .flatMap(this::successResponse);
     }
 
     @PostMapping
     public Mono<ResponseEntity<SettingDto>> create(@Valid @RequestBody SettingDto dto) {
         return settingService.create(dto)
-                .flatMap(this::successResponse)
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponse());
+                .flatMap(this::successResponse);
     }
 
     @PutMapping("/{id}")
     public Mono<ResponseEntity<SettingDto>> update(@PathVariable String id, @Valid @RequestBody SettingDto dto) {
         return settingService.update(id, dto)
-                .flatMap(this::successResponse)
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponse());
+                .flatMap(this::successResponse);
     }
 
     @DeleteMapping("/{id}")
-    public Mono<ResponseEntity<Void>> delete(@PathVariable String id) {
+    public Mono<ResponseEntity<String>> delete(@PathVariable String id) {
         return settingService.delete(id)
-                .flatMap(this::successResponse)
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponse());
+                .then(Mono.defer(this::successResponseDelete));
     }
 }

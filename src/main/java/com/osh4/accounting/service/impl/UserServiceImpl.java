@@ -32,42 +32,42 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Slf4j
 @AllArgsConstructor
 public class UserServiceImpl implements UserService {
-    private UserRepository userRepository;
-    private UserMapper userMapper;
+    private UserRepository repository;
+    private UserMapper mapper;
     private UserSignUpMapper signUpMapper;
     private final PasswordEncoder passwordEncoder;
 
     @Override
     public Mono<Page<UserDto>> getAll(PageRequest pageRequest) {
-        return userRepository.findAllBy(pageRequest.withSort(Sort.by("id").descending()))
-                .map(userMapper::toDto)
+        return repository.findAllBy(pageRequest.withSort(Sort.by("id").descending()))
+                .map(mapper::toDto)
                 .collectList()
-                .zipWith(userRepository.count())
+                .zipWith(repository.count())
                 .map(t -> new PageImpl<>(t.getT1(), pageRequest, t.getT2()));
     }
 
     @Override
     public Mono<UserDto> get(String id) {
-        return userRepository.findById(id)
-                .map(userMapper::toDto)
+        return repository.findById(id)
+                .map(mapper::toDto)
                 .switchIfEmpty(Mono.error(NotFoundException.fromUserEmail(id)));
     }
 
     @Override
     public Mono<UserDto> create(UserDto dto) {
-        return userRepository.findByEmail(dto.getEmail())
-                .switchIfEmpty(Mono.just(userMapper.toModel(dto).setAsNew()).map(this::encodePassword).flatMap(userRepository::save))
+        return repository.findByEmail(dto.getEmail())
+                .switchIfEmpty(Mono.just(mapper.toModel(dto).setAsNew()).map(this::encodePassword).flatMap(repository::save))
                 .filter(User::isNewEntity)
-                .map(userMapper::toDto)
+                .map(mapper::toDto)
                 .switchIfEmpty(Mono.error(AlreadyExistsException.fromUserEmail(dto.getEmail())));
     }
 
     @Override
     public Mono<UserDto> signUp(UserCredentialsDto dto) {
-        return userRepository.findByEmail(dto.getEmail())
-                .switchIfEmpty(Mono.just(signUpMapper.toModel(dto).setAsNew()).map(this::encodePassword).flatMap(userRepository::save))
+        return repository.findByEmail(dto.getEmail())
+                .switchIfEmpty(Mono.just(signUpMapper.toModel(dto).setAsNew()).map(this::encodePassword).flatMap(repository::save))
                 .filter(User::isNewEntity)
-                .map(userMapper::toDto)
+                .map(mapper::toDto)
                 .switchIfEmpty(Mono.error(AlreadyExistsException.fromUserEmail(dto.getEmail())));
     }
 
@@ -78,17 +78,17 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Mono<UserDto> update(String email, UserDto dto) {
-        return userRepository.findByEmail(email)
+        return repository.findByEmail(email)
                 .switchIfEmpty(Mono.error(NotFoundException.fromUserEmail(email)))
                 .flatMap(model -> updateFields(model, dto))
-                .map(userMapper::toDto);
+                .map(mapper::toDto);
     }
 
     @Override
     public Mono<Void> delete(String email) {
-        return userRepository.findByEmail(email)
+        return repository.findByEmail(email)
                 .switchIfEmpty(Mono.error(NotFoundException.fromUserEmail(email)))
-                .flatMap(user -> userRepository.deleteById(user.getId()));
+                .flatMap(user -> repository.deleteById(user.getId()));
     }
 
     private Mono<User> updateFields(User model, UserDto dto) {
@@ -110,15 +110,15 @@ public class UserServiceImpl implements UserService {
         if (CollectionUtils.isNotEmpty(dto.getRoles()) && ObjectUtils.notEqual(model.getRoles(), dto.getRoles())) {
             model.setRoles(dto.getRoles().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toSet()));
         }
-        return userRepository.save(model);
+        return repository.save(model);
     }
 
     @Override
     public Mono<UserDetails> findByUsername(String username) {
-        return userRepository.findByEmail(username)
+        return repository.findByEmail(username)
                 .switchIfEmpty(Mono.error(NotFoundException.fromUserEmail(username)))
                 .doOnError(error -> log.error(error.getMessage(), error))
-                .map(userMapper::toDto)
+                .map(mapper::toDto)
                 .map(UserDetails.class::cast);
     }
 }

@@ -19,4 +19,24 @@ public class NotFoundException extends Exception {
     public static NotFoundException fromAccountId(String accountId) {
         return new NotFoundException(String.format("Account with id %s not found", accountId));
     }
+
+    public static NotFoundException fromTransactionTypeId(String transactionTypeId) {
+        return new NotFoundException(String.format("Transaction type with id %s not found", transactionTypeId));
+    }
+
+    public static NotFoundException fromTransactionCategoryId(String transactionCategoryId) {
+        return new NotFoundException(String.format("Transaction category with id %s not found", transactionCategoryId));
+    }
+
+    public static NotFoundException fromTransactionId(String transactionId) {
+        return new NotFoundException(String.format("Transaction with id %s not found", transactionId));
+    }
+
+    public static AlreadyExistsException fromSettingId(String settingId) {
+        return new AlreadyExistsException(String.format("Setting with id %s not found", settingId));
+    }
+
+    public static AlreadyExistsException fromSettingTypeName(String settingTypeName) {
+        return new AlreadyExistsException(String.format("Setting type with name %s not found", settingTypeName));
+    }
 }

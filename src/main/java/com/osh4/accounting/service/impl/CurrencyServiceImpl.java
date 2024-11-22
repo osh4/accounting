@@ -23,56 +23,56 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Slf4j
 @AllArgsConstructor
 public class CurrencyServiceImpl implements CurrencyService {
-    private CurrencyRepository currencyRepository;
-    private CurrencyMapper currencyMapper;
+    private CurrencyRepository repository;
+    private CurrencyMapper mapper;
 
     @Override
     public Mono<Page<CurrencyDto>> getAll(PageRequest pageRequest) {
-        return currencyRepository.findAllBy(pageRequest)
-                .map(currencyMapper::toDto)
+        return repository.findAllBy(pageRequest)
+                .map(mapper::toDto)
                 .collectList()
-                .zipWith(currencyRepository.count())
+                .zipWith(repository.count())
                 .map(t -> new PageImpl<>(t.getT1(), pageRequest, t.getT2()));
     }
 
     @Override
     public Mono<CurrencyDto> get(String id) {
-        return currencyRepository.findById(id)
-                .map(currencyMapper::toDto)
+        return repository.findById(id)
+                .map(mapper::toDto)
                 .switchIfEmpty(Mono.error(new Exception()));
     }
 
     @Override
     public Mono<CurrencyDto> getByIsocode(String isocode) {
-        return currencyRepository.findByIsoCode(isocode)
+        return repository.findByIsoCode(isocode)
                 .doOnError(error -> log.error(error.getMessage(), error))
                 .onErrorResume(it -> Mono.empty())
-                .map(currencyMapper::toDto)
+                .map(mapper::toDto)
                 .switchIfEmpty(Mono.error(NotFoundException.fromCurrencyIsoCode(isocode)));
     }
 
     @Override
     public Mono<CurrencyDto> create(CurrencyDto dto) {
-        return currencyRepository.findByIsoCode(dto.getIsoCode())
-                .switchIfEmpty(Mono.just(currencyMapper.toModel(dto).setAsNew()).flatMap(currencyRepository::save))
+        return repository.findByIsoCode(dto.getIsoCode())
+                .switchIfEmpty(Mono.just(mapper.toModel(dto).setAsNew()).flatMap(repository::save))
                 .filter(Currency::isNewEntity)
-                .map(currencyMapper::toDto)
+                .map(mapper::toDto)
                 .switchIfEmpty(Mono.error(AlreadyExistsException.fromCurrencyIsoCode(dto.getIsoCode())));
     }
 
     @Override
     public Mono<CurrencyDto> update(String isoCode, CurrencyDto dto) {
-        return currencyRepository.findByIsoCode(isoCode)
+        return repository.findByIsoCode(isoCode)
                 .switchIfEmpty(Mono.error(NotFoundException.fromCurrencyIsoCode(isoCode)))
                 .flatMap(model -> updateFields(model, dto))
-                .map(currencyMapper::toDto);
+                .map(mapper::toDto);
     }
 
     @Override
     public Mono<Void> delete(String isoCode) {
-        return currencyRepository.findByIsoCode(isoCode)
+        return repository.findByIsoCode(isoCode)
                 .switchIfEmpty(Mono.error(NotFoundException.fromCurrencyIsoCode(isoCode)))
-                .flatMap(currency -> currencyRepository.deleteById(currency.getId()));
+                .flatMap(currency -> repository.deleteById(currency.getId()));
     }
 
     private Mono<Currency> updateFields(Currency model, CurrencyDto dto) {
@@ -88,6 +88,6 @@ public class CurrencyServiceImpl implements CurrencyService {
         if (isNotBlank(dto.getLongName()) && ObjectUtils.notEqual(dto.getLongName(), model.getLongName())) {
             model.setLongName(dto.getLongName());
         }
-        return currencyRepository.save(model);
+        return repository.save(model);
     }
 }

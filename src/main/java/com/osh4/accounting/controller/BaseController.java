@@ -24,23 +24,11 @@ public class BaseController {
                 .body(body));
     }
 
-    protected <T> ResponseEntity<T> failResponse(T body) {
-        return ResponseEntity.unprocessableEntity().body(body);
-    }
-
-    protected <T> ResponseEntity<T> failResponse() {
-        return ResponseEntity.unprocessableEntity().build();
-    }
-
     protected String getEntityName() {
         return this.getClass().getSimpleName().replace("Controller", StringUtils.EMPTY);
     }
 
     protected Mono<ResponseEntity<String>> successResponseDelete() {
         return successResponse(MSG_THE + SPACE + getEntityName() + SPACE + MSG_DELETE_SUCCESS);
-    }
-
-    protected ResponseEntity<String> failResponseDelete() {
-        return failResponse(MSG_DELETE_FAIL + SPACE + MSG_THE.toLowerCase() + SPACE + getEntityName());
     }
 }

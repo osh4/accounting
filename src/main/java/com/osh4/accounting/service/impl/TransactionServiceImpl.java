@@ -5,6 +5,8 @@ import com.osh4.accounting.dto.AccountDto;
 import com.osh4.accounting.dto.TransactionCategoryDto;
 import com.osh4.accounting.dto.TransactionDto;
 import com.osh4.accounting.dto.TransactionTypeDto;
+import com.osh4.accounting.exception.AlreadyExistsException;
+import com.osh4.accounting.exception.NotFoundException;
 import com.osh4.accounting.persistance.r2dbc.Transaction;
 import com.osh4.accounting.persistance.repository.TransactionRepository;
 import com.osh4.accounting.service.AccountService;
@@ -12,6 +14,7 @@ import com.osh4.accounting.service.TransactionCategoryService;
 import com.osh4.accounting.service.TransactionService;
 import com.osh4.accounting.service.TransactionTypeService;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
@@ -32,24 +35,25 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * @author osh4 <konstantin@osh4.com>
  */
 @Service
+@Slf4j
 @AllArgsConstructor
 public class TransactionServiceImpl implements TransactionService {
-    private TransactionRepository transactionRepository;
+    private TransactionRepository repository;
     private TransactionTypeService transactionTypeService;
     private TransactionCategoryService transactionCategoryService;
     private AccountService accountService;
-    private TransactionMapper transactionMapper;
+    private TransactionMapper mapper;
 
     @Override
     public Mono<Page<TransactionDto>> getAll(PageRequest pageRequest) {
-        return transactionRepository.findAllBy(pageRequest)
-                .map(transactionMapper::toDto)
+        return repository.findAllBy(pageRequest)
+                .map(mapper::toDto)
                 .flatMap(this::populateSourceAccount)
                 .flatMap(this::populateTargetAccount)
                 .flatMap(this::populateTransactionType)
                 .flatMap(this::populateTransactionCategory)
                 .collectList()
-                .zipWith(transactionRepository.count())
+                .zipWith(repository.count())
                 .map(t -> new PageImpl<>(t.getT1(), pageRequest, t.getT2()));
     }
 
@@ -111,36 +115,44 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public Mono<TransactionDto> get(String id) {
-        return transactionRepository.findById(id)
-                .map(transactionMapper::toDto)
+        return repository.findById(id)
+                .doOnError(error -> log.error(error.getMessage(), error))
+                .onErrorResume(it -> Mono.empty())
+                .map(mapper::toDto)
                 .flatMap(this::populateSourceAccount)
                 .flatMap(this::populateTargetAccount)
                 .flatMap(this::populateTransactionType)
                 .flatMap(this::populateTransactionCategory)
-                .switchIfEmpty(Mono.error(new Exception()));
+                .switchIfEmpty(Mono.error(NotFoundException.fromTransactionId(id)));
     }
 
     @Override
     public Mono<BigDecimal> getAmountForDatePeriod(LocalDateTime from, LocalDateTime to) {
-        return transactionRepository.findByTransactionDateBetween(from, to);
+        return repository.findByTransactionDateBetween(from, to);
     }
 
     @Override
     public Mono<TransactionDto> create(TransactionDto dto) {
-        return transactionRepository.save(transactionMapper.toModel(dto).setAsNew())
-                .map(transactionMapper::toDto);
+        return repository.findById(dto.getId())
+                .switchIfEmpty(Mono.just(mapper.toModel(dto).setAsNew()).flatMap(repository::save))
+                .filter(Transaction::isNewEntity)
+                .map(mapper::toDto)
+                .switchIfEmpty(Mono.error(AlreadyExistsException.fromTransactionId(dto.getId())));
     }
 
     @Override
     public Mono<TransactionDto> update(String id, TransactionDto dto) {
-        return transactionRepository.findById(id)
+        return repository.findById(id)
+                .switchIfEmpty(Mono.error(NotFoundException.fromTransactionId(id)))
                 .flatMap(model -> updateFields(model, dto))
-                .map(transactionMapper::toDto);
+                .map(mapper::toDto);
     }
 
     @Override
     public Mono<Void> delete(String id) {
-        return transactionRepository.deleteById(id);
+        return repository.findById(id)
+                .switchIfEmpty(Mono.error(NotFoundException.fromTransactionId(id)))
+                .flatMap(account -> repository.deleteById(id));
     }
 
     private Mono<Transaction> updateFields(Transaction model, TransactionDto dto) {
@@ -166,7 +178,7 @@ public class TransactionServiceImpl implements TransactionService {
             model.setTargetAccountId(dto.getTargetAccount().getId());
         }
 
-        return transactionRepository.save(model);
+        return repository.save(model);
     }
 
 }

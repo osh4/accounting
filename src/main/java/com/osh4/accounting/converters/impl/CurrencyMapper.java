@@ -16,6 +16,7 @@ import java.util.UUID;
 public interface CurrencyMapper {
     CurrencyDto toDto(Currency model);
 
+    @Mapping(target = "isNewEntity", ignore = true)
     @Mapping(source = "id", target = "id", qualifiedByName = "currencyIdSaveMapper")
     Currency toModel(CurrencyDto dto);
 

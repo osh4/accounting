@@ -34,19 +34,19 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 @Slf4j
 @AllArgsConstructor
 public class AccountServiceImpl implements AccountService {
-    private AccountRepository accountRepository;
+    private AccountRepository repository;
     private CurrencyService currencyService;
     private UserService userService;
-    private AccountMapper accountMapper;
+    private AccountMapper mapper;
 
     @Override
     public Mono<Page<AccountDto>> getAll(PageRequest pageRequest) {
-        return accountRepository.findAllBy(pageRequest)
-                .map(accountMapper::toDto)
+        return repository.findAllBy(pageRequest)
+                .map(mapper::toDto)
                 .flatMap(this::populateUser)
                 .flatMap(this::populateCurrency)
                 .collectList()
-                .zipWith(accountRepository.count())
+                .zipWith(repository.count())
                 .map(t -> new PageImpl<>(t.getT1(), pageRequest, t.getT2()));
     }
 
@@ -80,36 +80,36 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Mono<AccountDto> get(String id) {
-        return accountRepository.findById(id)
+        return repository.findById(id)
                 .doOnError(error -> log.error(error.getMessage(), error))
                 .onErrorResume(it -> Mono.empty())
-                .map(accountMapper::toDto)
+                .map(mapper::toDto)
                 .switchIfEmpty(Mono.error(NotFoundException.fromAccountId(id)));
     }
 
     @Override
     public Mono<AccountDto> create(AccountDto dto) {
-        return accountRepository.findByName(dto.getName())
-                .switchIfEmpty(Mono.just(accountMapper.toModel(dto).setAsNew()).flatMap(accountRepository::save))
+        return repository.findByName(dto.getName())
+                .switchIfEmpty(Mono.just(mapper.toModel(dto).setAsNew()).flatMap(repository::save))
                 .filter(Account::isNewEntity)
-                .map(accountMapper::toDto)
+                .map(mapper::toDto)
                 .switchIfEmpty(Mono.error(AlreadyExistsException.fromAccountName(dto.getName())));
     }
 
     @Override
     @Transactional
     public Mono<AccountDto> update(String id, AccountDto dto) {
-        return accountRepository.findById(id)
+        return repository.findById(id)
                 .switchIfEmpty(Mono.error(NotFoundException.fromAccountId(id)))
                 .flatMap(model -> updateFields(model, dto))
-                .map(accountMapper::toDto);
+                .map(mapper::toDto);
     }
 
     @Override
     public Mono<Void> delete(String id) {
-        return accountRepository.findById(id)
+        return repository.findById(id)
                 .switchIfEmpty(Mono.error(NotFoundException.fromAccountId(id)))
-                .flatMap(account -> accountRepository.deleteById(id));
+                .flatMap(account -> repository.deleteById(id));
     }
 
     @Override
@@ -145,6 +145,6 @@ public class AccountServiceImpl implements AccountService {
         if (nonNull(dto.getUser()) && isNotBlank(dto.getUser().getId()) && isNotBlank(dto.getUser().getId()) && ObjectUtils.notEqual(model.getUserId(), dto.getUser().getId())) {
             model.setUserId(dto.getUser().getId());
         }
-        return accountRepository.save(model);
+        return repository.save(model);
     }
 }

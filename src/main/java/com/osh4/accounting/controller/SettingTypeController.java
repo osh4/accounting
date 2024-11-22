@@ -22,9 +22,7 @@ public class SettingTypeController extends BaseController {
     @GetMapping("/{name}")
     public Mono<ResponseEntity<SettingTypeDto>> get(@PathVariable String name) {
         return settingService.getType(name)
-                .flatMap(this::successResponse)
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponse());
+                .flatMap(this::successResponse);
     }
 
     @GetMapping()

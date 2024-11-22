@@ -3,7 +3,6 @@ package com.osh4.accounting.config.security;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
-import org.apache.commons.lang3.tuple.Pair;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -33,9 +32,5 @@ public class JwtTokenAuthenticatorService {
 
     public Jws<Claims> validateJwt(String jwt) {
         return Jwts.parser().verifyWith(keyPair.getPublic()).build().parseSignedClaims(jwt);
-    }
-
-    public Pair<String, Jws<Claims>> decryptJwt(String jwt) {
-        return Pair.of(jwt, Jwts.parser().verifyWith(keyPair.getPublic()).build().parseSignedClaims(jwt));
     }
 }

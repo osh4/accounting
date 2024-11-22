@@ -30,17 +30,13 @@ public class UserController extends BaseController {
     @PutMapping("/{email}")
     public Mono<ResponseEntity<UserDto>> update(@PathVariable String email, @RequestBody UserDto dto) {
         return userService.update(email, dto)
-                .flatMap(this::successResponse)
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponse());
+                .flatMap(this::successResponse);
     }
 
     @DeleteMapping("/{email}")
     public Mono<ResponseEntity<String>> delete(@PathVariable String email) {
         return userService.delete(email)
-                .flatMap(s -> successResponseDelete())
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponseDelete());
+                .then(Mono.defer(this::successResponseDelete));
     }
 
 }

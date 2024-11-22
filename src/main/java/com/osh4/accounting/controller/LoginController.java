@@ -52,7 +52,7 @@ public class LoginController extends BaseController {
 
     private static ResponseCookie buildAuthCookie(String jwt) {
         return ResponseCookie.fromClientResponse("X-Auth", jwt)
-                .maxAge(3600)
+                .maxAge(900)
                 .httpOnly(true)
                 .path("/")
                 .secure(true)

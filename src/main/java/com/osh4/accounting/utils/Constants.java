@@ -5,7 +5,7 @@ import java.util.Locale;
 
 public class Constants {
 
-    public static final String MSG_DELETE_SUCCESS = "Successfully";
+    public static final String MSG_DELETE_SUCCESS = "was deleted successfully";
     public static final String MSG_DELETE_FAIL = "Can't delete";
     public static final String MSG_THE = "The";
 

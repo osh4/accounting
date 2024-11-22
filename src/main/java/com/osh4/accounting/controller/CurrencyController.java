@@ -26,43 +26,27 @@ public class CurrencyController extends BaseController {
         return currencyService.getAll(paginatedSearchService.paginationInfo(page, size, sort));
     }
 
-    @GetMapping("/{id}")
-    public Mono<ResponseEntity<CurrencyDto>> get(@PathVariable String id) {
-        return currencyService.get(id)
-                .flatMap(this::successResponse)
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponse());
-    }
-
-    @GetMapping("/isocode/{isocode}")
+    @GetMapping("/{isocode}")
     public Mono<ResponseEntity<CurrencyDto>> getByIsocode(@PathVariable String isocode) {
         return currencyService.getByIsocode(isocode)
-                .flatMap(this::successResponse)
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponse());
+                .flatMap(this::successResponse);
     }
 
     @PostMapping
     public Mono<ResponseEntity<CurrencyDto>> create(@Valid @RequestBody CurrencyDto dto) {
         return currencyService.create(dto)
-                .flatMap(this::successResponse)
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponse());
+                .flatMap(this::successResponse);
     }
 
     @PutMapping("/{isoCode}")
     public Mono<ResponseEntity<CurrencyDto>> update(@PathVariable String isoCode, @RequestBody CurrencyDto dto) {
         return currencyService.update(isoCode, dto)
-                .flatMap(this::successResponse)
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponse());
+                .flatMap(this::successResponse);
     }
 
     @DeleteMapping("/{isoCode}")
     public Mono<ResponseEntity<String>> delete(@PathVariable String isoCode) {
         return currencyService.delete(isoCode)
-                .flatMap(s -> successResponseDelete())
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponseDelete());
+                .then(Mono.defer(this::successResponseDelete));
     }
 }

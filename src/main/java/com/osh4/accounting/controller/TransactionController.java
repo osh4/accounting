@@ -27,9 +27,7 @@ public class TransactionController extends BaseController {
     @GetMapping("/{id}")
     public Mono<ResponseEntity<TransactionDto>> get(@PathVariable String id) {
         return transactionService.get(id)
-                .flatMap(this::successResponse)
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponse());
+                .flatMap(this::successResponse);
     }
 
     @PostMapping
@@ -43,16 +41,12 @@ public class TransactionController extends BaseController {
     @PutMapping("/{id}")
     public Mono<ResponseEntity<TransactionDto>> update(@PathVariable String id, @RequestBody TransactionDto dto) {
         return transactionService.update(id, dto)
-                .flatMap(this::successResponse)
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponse());
+                .flatMap(this::successResponse);
     }
 
     @DeleteMapping("/{id}")
     public Mono<ResponseEntity<String>> delete(@PathVariable String id) {
         return transactionService.delete(id)
-                .flatMap(s -> successResponseDelete())
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponseDelete());
+                .then(Mono.defer(this::successResponseDelete));
     }
 }

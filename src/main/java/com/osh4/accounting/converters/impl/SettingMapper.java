@@ -17,6 +17,7 @@ public interface SettingMapper {
     @Mapping(source = "settingTypeId", target = "settingType", qualifiedByName = "settingTypeGetMapper")
     SettingDto toDto(Setting model);
 
+    @Mapping(target = "isNewEntity", ignore = true)
     @Mapping(source = "settingType", target = "settingTypeId", qualifiedByName = "settingTypeSaveMapper")
     Setting toModel(SettingDto dto);
 
