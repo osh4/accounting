@@ -15,4 +15,8 @@ public class AlreadyExistsException extends Exception {
     public static AlreadyExistsException fromUserEmail(String email) {
         return new AlreadyExistsException(String.format("User with email [%s] already exist", email));
     }
+
+    public static AlreadyExistsException fromAccountName(String accountName) {
+        return new AlreadyExistsException(String.format("Account with name %s already exist", accountName));
+    }
 }

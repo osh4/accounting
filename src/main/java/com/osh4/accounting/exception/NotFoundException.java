@@ -15,4 +15,8 @@ public class NotFoundException extends Exception {
     public static NotFoundException fromUserEmail(String email) {
         return new NotFoundException(String.format("User with email %s not found", email));
     }
+
+    public static NotFoundException fromAccountId(String accountId) {
+        return new NotFoundException(String.format("Account with id %s not found", accountId));
+    }
 }

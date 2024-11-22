@@ -26,32 +26,24 @@ public class AccountController extends BaseController {
     @GetMapping("/{id}")
     public Mono<ResponseEntity<AccountDto>> get(@PathVariable String id) {
         return accountService.get(id)
-                .flatMap(this::successResponse)
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponse());
+                .flatMap(this::successResponse);
     }
 
     @PostMapping
     public Mono<ResponseEntity<AccountDto>> create(@RequestBody AccountDto dto) {
         return accountService.create(dto)
-                .flatMap(this::successResponse)
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponse());
+                .flatMap(this::successResponse);
     }
 
     @PutMapping("/{id}")
     public Mono<ResponseEntity<AccountDto>> update(@PathVariable String id, @RequestBody AccountDto dto) {
         return accountService.update(id, dto)
-                .flatMap(this::successResponse)
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponse());
+                .flatMap(this::successResponse);
     }
 
     @DeleteMapping("/{id}")
     public Mono<ResponseEntity<String>> delete(@PathVariable String id) {
         return accountService.delete(id)
-                .flatMap(s -> successResponseDelete())
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponseDelete());
+                .then(Mono.defer(this::successResponseDelete));
     }
 }
