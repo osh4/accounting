@@ -12,6 +12,7 @@ import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.server.reactive.ServerHttpResponse;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -52,11 +53,22 @@ public class ValidationHandler implements WebExceptionHandler {
         } else if (throwable instanceof ExpiredJwtException || throwable instanceof SignatureException) {
             response.setStatusCode(HttpStatus.UNAUTHORIZED);
             response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-            response.getCookies().remove("X-Auth");
+            response.getHeaders().add("Set-Cookie", buildEmptyAuthCookie());
             return writeResponse(exchange, objectMapper.writeValueAsBytes(throwable.getMessage()));
         } else {
             return Mono.error(throwable);
         }
+    }
+
+
+    private static String buildEmptyAuthCookie() {
+        return ResponseCookie.fromClientResponse("X-Auth", "")
+                .maxAge(0)
+                .httpOnly(true)
+                .path("/")
+                .secure(true)
+                .build()
+                .toString();
     }
 
     private Map<String, String> getValidationErrors(final WebExchangeBindException validationEx) {
