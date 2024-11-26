@@ -21,10 +21,10 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
 
+import java.util.Objects;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -77,10 +77,10 @@ class SettingServiceImplTest {
         when(settingMapper.toDto(setting)).thenReturn(settingDto);
 
         // when
-        SettingDto result = service.get(KEY).block();
+        var result = service.get(KEY);
 
         // then
-        assertEquals(settingDto, result);
+        StepVerifier.create(result).expectNext(settingDto).expectComplete().verify();
     }
 
     @Test
@@ -111,11 +111,13 @@ class SettingServiceImplTest {
         when(settingDto.getKey()).thenReturn(KEY);
 
         // when
-        SettingDto result = service.create(settingDto).block();
+        Mono<SettingDto> result = service.create(settingDto);
 
         // then
+        StepVerifier.create(result)
+                .expectNext(settingDto)
+                .verifyComplete();
         verify(settingRepository).save(setting);
-        assertEquals(settingDto, result);
     }
 
     @Test
@@ -130,13 +132,19 @@ class SettingServiceImplTest {
         when(settingTypeMapper.toDto(settingType)).thenReturn(settingTypeDto);
 
         // when
-        Page<SettingDto> result = service.getAll(pageRequest).block();
+        Mono<Page<SettingDto>> result = service.getAll(pageRequest);
 
         // then
-        assertThat(result).isNotEmpty();
-        assertThat(result.getContent()).hasSize(1)
-                .contains(settingDto);
-        assertThat(result.getContent().get(0).getSettingType()).isNotNull().isEqualTo(settingTypeDto);
+        StepVerifier.create(result)
+                .expectNextMatches(this::isExpectedSettingWithType)
+                .expectComplete()
+                .verify();
+    }
+
+    private boolean isExpectedSettingWithType(Page<SettingDto> res) {
+        return res.getContent().size() == 1 &&
+                res.getContent().contains(settingDto) &&
+                Objects.equals(res.getContent().get(0).getSettingType(), settingTypeDto);
     }
 
     @Test
@@ -177,11 +185,10 @@ class SettingServiceImplTest {
         when(settingRepository.count()).thenReturn(Mono.just(RECORDS_COUNT));
 
         // when
-        var result = service.getAll(pageRequest).block();
+        var result = service.getAll(pageRequest);
 
         // then
-        assertNotNull(result);
-        assertThat(result.getContent()).hasSize(0);
+        StepVerifier.create(result).expectNextMatches(res -> res.getContent().isEmpty()).expectComplete().verify();
     }
 
     @Test
@@ -236,12 +243,12 @@ class SettingServiceImplTest {
         when(settingMapper.toDto(setting)).thenReturn(settingDto);
 
         // when
-        SettingDto result = service.update(KEY, null).block();
+        var result = service.update(KEY, null);
 
         // then
+        StepVerifier.create(result).expectNext(settingDto).expectComplete().verify();
         verify(setting, never()).setValue(NEW_VALUE);
         verify(settingRepository, never()).save(setting);
-        assertEquals(settingDto, result);
     }
 
     @Test
@@ -254,7 +261,7 @@ class SettingServiceImplTest {
         service.delete(KEY).block();
 
         // then
-        verify(settingRepository, times(1)).deleteById(KEY);
+        verify(settingRepository).deleteById(KEY);
     }
 
     @Test
@@ -277,9 +284,9 @@ class SettingServiceImplTest {
         when(settingTypeMapper.toDto(settingType)).thenReturn(settingTypeDto);
 
         // when
-        SettingTypeDto result = service.getAllTypes().blockFirst();
+        var result = service.getAllTypes();
 
         // then
-        assertThat(result).isEqualTo(settingTypeDto);
+        StepVerifier.create(result).expectNext(settingTypeDto).expectComplete().verify();
     }
 }
