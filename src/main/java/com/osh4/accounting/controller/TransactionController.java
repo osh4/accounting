@@ -33,9 +33,7 @@ public class TransactionController extends BaseController {
     @PostMapping
     public Mono<ResponseEntity<TransactionDto>> create(@RequestBody TransactionDto dto) {
         return transactionService.create(dto)
-                .flatMap(this::successResponse)
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponse());
+                .flatMap(this::successResponse);
     }
 
     @PutMapping("/{id}")
