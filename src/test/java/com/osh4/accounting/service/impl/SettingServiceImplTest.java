@@ -4,6 +4,7 @@ import com.osh4.accounting.converters.impl.SettingMapper;
 import com.osh4.accounting.converters.impl.SettingTypeMapper;
 import com.osh4.accounting.dto.SettingDto;
 import com.osh4.accounting.dto.SettingTypeDto;
+import com.osh4.accounting.exception.AlreadyExistsException;
 import com.osh4.accounting.persistance.r2dbc.Setting;
 import com.osh4.accounting.persistance.r2dbc.SettingType;
 import com.osh4.accounting.persistance.repository.SettingRepository;
@@ -18,12 +19,12 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.test.StepVerifier;
 
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -37,6 +38,7 @@ class SettingServiceImplTest {
     private static final String NEW_SETTING_TYPE_ID = "newSettingTypeId";
     private static final String NEW_VALUE = "newValue";
     private static final String SETTING_TYPE_ID = "settingTypeId";
+    private static final String SETTING_TYPE_NAME = "settingTypeName";
     private static final Long RECORDS_COUNT = 10L;
     private static final Sort DESC_SETTING_TYPE_ID_SORT = Sort.by("settingTypeId").descending();
     private static final Sort ASC_SETTING_TYPE_ID_SORT = Sort.by("settingTypeId").ascending();
@@ -82,12 +84,31 @@ class SettingServiceImplTest {
     }
 
     @Test
+    public void shouldNotCreateSettingIfExist() {
+        // given
+        when(settingRepository.findById(KEY)).thenReturn(Mono.just(setting));
+        when(settingMapper.toModel(settingDto)).thenReturn(setting);
+        when(setting.setAsNew()).thenReturn(setting);
+        when(settingDto.getKey()).thenReturn(KEY);
+
+        // when
+        Mono<SettingDto> result = service.create(settingDto);
+
+        StepVerifier.create(result)
+                .expectError(AlreadyExistsException.class)
+                .verify();
+    }
+
+    @Test
     public void shouldCreateSettingFromDto() {
         // given
+        when(settingRepository.findById(KEY)).thenReturn(Mono.empty());
         when(settingRepository.save(any(Setting.class))).thenReturn(Mono.just(setting));
         when(settingMapper.toModel(settingDto)).thenReturn(setting);
         when(setting.setAsNew()).thenReturn(setting);
+        when(setting.isNewEntity()).thenReturn(true);
         when(settingMapper.toDto(setting)).thenReturn(settingDto);
+        when(settingDto.getKey()).thenReturn(KEY);
 
         // when
         SettingDto result = service.create(settingDto).block();
@@ -225,8 +246,12 @@ class SettingServiceImplTest {
 
     @Test
     public void shouldDeleteSettings() {
+        //given
+        when(settingRepository.findById(KEY)).thenReturn(Mono.just(setting));
+        when(setting.getId()).thenReturn(KEY);
+        when(settingRepository.deleteById(KEY)).thenReturn(Mono.empty());
         // when
-        service.delete(KEY);
+        service.delete(KEY).block();
 
         // then
         verify(settingRepository, times(1)).deleteById(KEY);
@@ -235,11 +260,11 @@ class SettingServiceImplTest {
     @Test
     public void shouldGetSettingType() {
         // given
-        when(settingTypeRepository.findById(SETTING_TYPE_ID)).thenReturn(Mono.just(settingType));
+        when(settingTypeRepository.findByName(SETTING_TYPE_NAME)).thenReturn(Mono.just(settingType));
         when(settingTypeMapper.toDto(settingType)).thenReturn(settingTypeDto);
 
         // when
-        SettingTypeDto result = service.getType(SETTING_TYPE_ID).block();
+        SettingTypeDto result = service.getType(SETTING_TYPE_NAME).block();
 
         // then
         assertThat(result).isEqualTo(settingTypeDto);

@@ -136,7 +136,7 @@ public class SettingServiceImpl implements SettingService {
     public Mono<Void> delete(String id) {
         return repository.findById(id)
                 .switchIfEmpty(Mono.error(NotFoundException.fromSettingId(id)))
-                .flatMap(currency -> repository.deleteById(currency.getId()));
+                .flatMap(setting -> repository.deleteById(setting.getId()));
     }
 
     @Override
