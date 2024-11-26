@@ -27,18 +27,14 @@ public class TotalsController extends BaseController {
                                                     @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
                                                     LocalDate to) {
         return totalsService.calculateTotalsForPeriod(from, to)
-                .flatMap(this::successResponse)
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponse());
+                .flatMap(this::successResponse);
     }
 
     @GetMapping("/day")
     public Mono<ResponseEntity<String>> getByDay(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
                                                  LocalDate day) {
         return totalsService.calculateTotalsForDay(day)
-                .flatMap(this::successResponse)
-                .doOnError(error -> log.error(error.getMessage(), error))
-                .onErrorReturn(failResponse());
+                .flatMap(this::successResponse);
     }
 
 }
