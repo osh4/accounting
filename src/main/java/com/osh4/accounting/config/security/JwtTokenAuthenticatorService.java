@@ -1,9 +1,10 @@
 package com.osh4.accounting.config.security;
 
+import com.osh4.accounting.dto.UserLoginResponseDto;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
-import org.springframework.security.core.userdetails.UserDetails;
+
 import org.springframework.stereotype.Service;
 
 import java.security.KeyPair;
@@ -19,11 +20,11 @@ public class JwtTokenAuthenticatorService {
 
     private final KeyPair keyPair = Jwts.SIG.RS256.keyPair().build();
 
-    public String createJwt(UserDetails user) {
+    public String createJwt(UserLoginResponseDto user) {
         return Jwts.builder()
-                .subject(user.getUsername())
+                .subject(user.getEmail())
                 .issuer("identity")
-                .claim("roles", user.getAuthorities())
+                .claim("roles", user.getRoles())
                 .expiration(Date.from(Instant.now().plus(Duration.ofMinutes(15))))
                 .issuedAt(Date.from(Instant.now()))
                 .signWith(keyPair.getPrivate(), Jwts.SIG.RS256)

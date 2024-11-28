@@ -53,7 +53,6 @@ public class ValidationHandler implements WebExceptionHandler {
         } else if (throwable instanceof ExpiredJwtException || throwable instanceof SignatureException) {
             response.setStatusCode(HttpStatus.UNAUTHORIZED);
             response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
-            response.getHeaders().add("Set-Cookie", buildEmptyAuthCookie());
             return writeResponse(exchange, objectMapper.writeValueAsBytes(throwable.getMessage()));
         } else {
             return Mono.error(throwable);

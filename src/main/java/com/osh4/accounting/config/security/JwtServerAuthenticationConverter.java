@@ -20,9 +20,9 @@ public class JwtServerAuthenticationConverter implements ServerAuthenticationCon
     @Override
     public Mono<Authentication> convert(ServerWebExchange exchange) {
         return Mono.justOrEmpty(exchange)
-                .flatMap(it -> Mono.justOrEmpty(it.getRequest().getCookies().get("X-Auth")))
+                .flatMap(it -> Mono.justOrEmpty(it.getRequest().getHeaders().get("X-Auth")))
                 .filter(CollectionUtils::isNotEmpty)
-                .map(it -> it.get(0).getValue())
+                .map(it -> it.get(0))
                 .map(it -> new UsernamePasswordAuthenticationToken(it, it));
     }
 }

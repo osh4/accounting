@@ -37,6 +37,7 @@ public class WebFluxSecurityConfig {
                 .permitAll()
                 .pathMatchers("/actuator/**")
                 .permitAll()
+                .pathMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .pathMatchers(HttpMethod.GET, "/users/all").hasAuthority("ADMIN")
                 .pathMatchers(HttpMethod.PUT, "/users/*").hasAuthority("ADMIN")
                 .pathMatchers(HttpMethod.DELETE, "/users/*").hasAuthority("ADMIN")
@@ -52,6 +53,7 @@ public class WebFluxSecurityConfig {
                 .disable()
                 .logout()
                 .disable()
+                .cors().and()
                 .build();
     }
 

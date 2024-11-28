@@ -118,7 +118,6 @@ public class UserServiceImpl implements UserService {
         return repository.findByEmail(username)
                 .switchIfEmpty(Mono.error(NotFoundException.fromUserEmail(username)))
                 .doOnError(error -> log.error(error.getMessage(), error))
-                .map(mapper::toDto)
-                .map(UserDetails.class::cast);
+                .map(mapper::toDto);
     }
 }
